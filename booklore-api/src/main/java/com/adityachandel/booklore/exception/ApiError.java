@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum ApiError {
     BOOK_NOT_FOUND(HttpStatus.NOT_FOUND, "Book not found with ID: %d"),
-    USER_NOT_FOUNDD(HttpStatus.NOT_FOUND, "User with ID %s not found"),
+    EMAIL_PROVIDER_NOT_FOUND(HttpStatus.NOT_FOUND, "Email provider with ID %s not found"),
     UNSUPPORTED_BOOK_TYPE(HttpStatus.BAD_REQUEST, "Unsupported book type for viewer settings"),
     INVALID_VIEWER_SETTING(HttpStatus.BAD_REQUEST, "Invalid viewer setting for the book"),
     FILE_READ_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Error reading files from path"),
@@ -31,6 +31,8 @@ public enum ApiError {
     USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "User not found: %s"),
     CANNOT_DELETE_ADMIN(HttpStatus.FORBIDDEN, "Admin user cannot be deleted"),
     UNAUTHORIZED(HttpStatus.FORBIDDEN, "%s"),
+    BAD_REQUEST(HttpStatus.BAD_REQUEST, "%s"),
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "%s"),
     PASSWORD_INCORRECT(HttpStatus.BAD_REQUEST, "Incorrect current password"),
     PASSWORD_WEAK(HttpStatus.BAD_REQUEST, "New password is not strong enough. It must be at least 8 characters long, contain an uppercase letter, a lowercase letter, a number, and a special character."),
     PASSWORD_SAME_AS_CURRENT(HttpStatus.BAD_REQUEST, "New password cannot be the same as the current password"),
