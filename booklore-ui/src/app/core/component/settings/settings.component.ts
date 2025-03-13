@@ -8,6 +8,7 @@ import {MetadataAdvancedFetchOptionsComponent} from "../../../metadata/metadata-
 import {MetadataRefreshOptions} from '../../../metadata/model/request/metadata-refresh-options.model';
 import {AppSettingsService} from '../../service/app-settings.service';
 import {MetadataSettingsComponent} from './metadata-settings/metadata-settings.component';
+import {EmailComponent} from '../email/email.component';
 
 @Component({
   selector: 'app-settings',
@@ -21,7 +22,8 @@ import {MetadataSettingsComponent} from './metadata-settings/metadata-settings.c
     AdminComponent,
     NgIf,
     AsyncPipe,
-    MetadataSettingsComponent
+    MetadataSettingsComponent,
+    EmailComponent
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss'

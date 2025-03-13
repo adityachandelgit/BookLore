@@ -24,6 +24,11 @@
           <app-admin></app-admin>
         </p-tabpanel>
       </ng-container>
+      <ng-container *ngIf="userData.permissions.admin">
+        <p-tabpanel value="2">
+          <app-email></app-email>
+        </p-tabpanel>
+      </ng-container>
     </p-tabpanels>
   </p-tabs>
 </div>

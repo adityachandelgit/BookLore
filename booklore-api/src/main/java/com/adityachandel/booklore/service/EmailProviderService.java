@@ -11,6 +11,9 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Slf4j
 @Service
 @AllArgsConstructor
@@ -32,5 +35,9 @@ public class EmailProviderService {
 
     public void deleteEmailProvider(Long id) {
         emailProviderRepository.deleteById(id);
+    }
+
+    public List<EmailProvider> getEmailProviders() {
+        return emailProviderRepository.findAll().stream().map(emailProviderMapper::toDTO).collect(Collectors.toList());
     }
 }

@@ -1,0 +1,50 @@
+<div class="p-4">
+  <!--<p-button outlined="true" label="Create Provider" (onClick)="openCreateProviderDialog()"></p-button>-->
+
+  <p-table [value]="emailProviders" class="mt-4">
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="width: 15%;">Name</th>
+        <th style="width: 15%;">Host</th>
+        <th style="width: 10%;">Port</th>
+        <th style="width: 20%;">Username</th>
+        <th style="width: 20%;">Password</th>
+        <th style="width: 10%;">Edit</th>
+        <th style="width: 10%;">Delete</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-provider>
+      <tr>
+        <td>
+          <input *ngIf="provider.isEditing" type="text" [(ngModel)]="provider.name" class="p-inputtext w-full"/>
+          <span *ngIf="!provider.isEditing">{{ provider.name }}</span>
+        </td>
+        <td>
+          <input *ngIf="provider.isEditing" type="text" [(ngModel)]="provider.host" class="p-inputtext w-full"/>
+          <span *ngIf="!provider.isEditing">{{ provider.host }}</span>
+        </td>
+        <td>
+          <input *ngIf="provider.isEditing" type="number" [(ngModel)]="provider.port" class="p-inputtext w-full"/>
+          <span *ngIf="!provider.isEditing">{{ provider.port }}</span>
+        </td>
+        <td>
+          <input *ngIf="provider.isEditing" type="text" [(ngModel)]="provider.username" class="p-inputtext w-full"/>
+          <span *ngIf="!provider.isEditing">{{ provider.username }}</span>
+        </td>
+        <td>
+          <input *ngIf="provider.isEditing" [(ngModel)]="provider.password" class="p-inputtext w-full"/>
+          <span *ngIf="!provider.isEditing" class="text-gray-400 italic">Hidden</span>
+        </td>
+        <td>
+          <p-button *ngIf="!provider.isEditing" icon="pi pi-pencil" outlined="true" severity="info" (onClick)="toggleEdit(provider)"></p-button>
+          <p-button *ngIf="provider.isEditing" icon="pi pi-check" outlined="true" severity="success" (onClick)="saveProvider(provider)"></p-button>
+          <p-button *ngIf="provider.isEditing" icon="pi pi-times" outlined="true" severity="danger" (onClick)="toggleEdit(provider)"></p-button>
+        </td>
+        <td>
+          <p-button icon="pi pi-trash" outlined="true" severity="danger" (onClick)="deleteProvider(provider)"></p-button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
