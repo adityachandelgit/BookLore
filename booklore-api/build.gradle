@@ -5,6 +5,10 @@ plugins {
     id 'org.hibernate.orm' version '6.6.10.Final'
 }
 
+ext {
+    testcontainersVersion = '1.20.6'
+}
+
 group = 'com.adityachandel'
 version = '0.0.1-SNAPSHOT'
 
@@ -65,10 +69,22 @@ dependencies {
 
     // --- API Documentation ---
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5'
+
+    // Test Dependencies
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation "org.testcontainers:testcontainers:${testcontainersVersion}"
+    testImplementation "org.testcontainers:junit-jupiter:${testcontainersVersion}"
+    testImplementation "org.testcontainers:mariadb:${testcontainersVersion}"
 }
 
 hibernate {
     enhancement {
         enableAssociationManagement = true
     }
+}
+
+test {
+    useJUnitPlatform()
 }
