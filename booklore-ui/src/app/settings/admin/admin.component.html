@@ -1,4 +1,4 @@
-<div class="p-4">
+<div class="p-4" *ngIf="userService.userData$ | async as userData">
   <p-button outlined="true" label="Create User" (onClick)="openCreateUserDialog()"></p-button>
 
   <p-table [value]="users" class="mt-4">
@@ -12,6 +12,8 @@
         <th style="width: 100px;">Can Download</th>
         <th style="width: 100px;">Can Edit Metadata</th>
         <th style="width: 100px;">Can Email Books</th>
+        <th style="width: 100px;">Can Manipulate Library</th>
+        <th style="width: 100px;">Admin</th>
         <th style="width: 100px;">Edit</th>
         <th style="width: 100px;">Change Password</th>
         <th style="width: 100px;">Delete</th>
@@ -60,12 +62,20 @@
           <p-checkbox [binary]="true" [(ngModel)]="user.permissions.canEmailBook" disabled *ngIf="!user.isEditing"></p-checkbox>
         </td>
         <td class="text-center">
-          <ng-container *ngIf="user.username !== 'admin'">
+          <p-checkbox [binary]="true" [(ngModel)]="user.permissions.canManipulateLibrary" *ngIf="user.isEditing"></p-checkbox>
+          <p-checkbox [binary]="true" [(ngModel)]="user.permissions.canManipulateLibrary" disabled *ngIf="!user.isEditing"></p-checkbox>
+        </td>
+        <td class="text-center">
+          <p-checkbox [binary]="true" [(ngModel)]="user.permissions.admin" *ngIf="user.isEditing"></p-checkbox>
+          <p-checkbox [binary]="true" [(ngModel)]="user.permissions.admin" disabled *ngIf="!user.isEditing"></p-checkbox>
+        </td>
+        <td class="text-center">
+          <ng-container *ngIf="user.id !== userData.id">
             <p-button *ngIf="!user.isEditing" icon="pi pi-pencil" outlined="true" severity="info" (onClick)="toggleEdit(user)"></p-button>
             <p-button *ngIf="user.isEditing" icon="pi pi-check" outlined="true" severity="success" (onClick)="saveUser(user)"></p-button>
             <p-button *ngIf="user.isEditing" icon="pi pi-times" outlined="true" severity="danger" (onClick)="toggleEdit(user)"></p-button>
           </ng-container>
-          <p-button *ngIf="user.username === 'admin'"
+          <p-button *ngIf="user.id !== userData.id"
                     icon="pi pi-pencil"
                     outlined="true"
                     severity="primary"
@@ -73,12 +83,12 @@
           </p-button>
         </td>
         <td class="text-center">
-          <ng-container *ngIf="user.username !== 'admin'">
+          <ng-container *ngIf="user.id !== userData.id">
             <p-button icon="pi pi-key" outlined="true" severity="warn" (onClick)="openChangePasswordDialog(user)"></p-button>
           </ng-container>
         </td>
         <td class="text-center">
-          <ng-container *ngIf="user.username !== 'admin'">
+          <ng-container *ngIf="user.id !== userData.id">
             <p-button icon="pi pi-trash" outlined="true" severity="danger" (onClick)="deleteUser(user)"></p-button>
           </ng-container>
         </td>

@@ -44,11 +44,15 @@ export class CreateUserDialogComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       username: ['', Validators.required],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      selectedLibraries: [[], Validators.required],
-      permissionUpload: [false],
-      permissionDownload: [false],
-      permissionEditMetadata: [false],
-      permissionEmailBook: [false]
+      assignedLibraries: [[], Validators.required],
+      permissions: this.fb.group({
+        admin: [false],
+        canUpload: [false],
+        canDownload: [false],
+        canEmailBook: [false],
+        canEditMetadata: [false],
+        canManipulateLibrary: [false],
+      }),
     });
   }
 
@@ -64,7 +68,7 @@ export class CreateUserDialogComponent implements OnInit {
 
     const userData = {
       ...this.userForm.value,
-      selectedLibraries: this.userForm.value.selectedLibraries.map((lib: Library) => lib.id)
+      assignedLibraries: this.userForm.value.assignedLibraries.map((lib: Library) => lib.id)
     };
 
     this.userService.createUser(userData).subscribe({

@@ -46,7 +46,9 @@ public class UserService {
         user.getPermissions().setPermissionUpload(updateRequest.getPermissions().isCanUpload());
         user.getPermissions().setPermissionDownload(updateRequest.getPermissions().isCanDownload());
         user.getPermissions().setPermissionEditMetadata(updateRequest.getPermissions().isCanEditMetadata());
+        user.getPermissions().setPermissionManipulateLibrary(updateRequest.getPermissions().isCanManipulateLibrary());
         user.getPermissions().setPermissionEmailBook(updateRequest.getPermissions().isCanEmailBook());
+        user.getPermissions().setPermissionAdmin(updateRequest.getPermissions().isAdmin());
 
         List<Long> libraryIds = updateRequest.getAssignedLibraries();
         if (libraryIds != null) {
@@ -62,13 +64,8 @@ public class UserService {
         BookLoreUserEntity user = userRepository.findById(id).orElseThrow(() -> ApiError.USER_NOT_FOUND.createException(id));
 
         if (user.getPermissions().isPermissionAdmin()) {
-            throw ApiError.CANNOT_DELETE_ADMIN.createException();
-        }
-
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (principal instanceof UserDetails userDetails) {
-            if (userDetails.getAuthorities().stream().noneMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"))) {
-                throw ApiError.UNAUTHORIZED.createException();
+            if (userRepository.findAllWithAdminPermissions().size() == 1) {
+                throw ApiError.CANNOT_DELETE_ADMIN.createException();
             }
         }
 

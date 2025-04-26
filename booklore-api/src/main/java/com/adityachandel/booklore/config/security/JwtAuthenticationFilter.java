@@ -1,6 +1,7 @@
 package com.adityachandel.booklore.config.security;
 
 import com.adityachandel.booklore.model.dto.BookLoreUser;
+import com.adityachandel.booklore.model.dto.UserPermissions;
 import com.adityachandel.booklore.model.entity.BookLoreUserEntity;
 import com.adityachandel.booklore.model.entity.UserPermissionsEntity;
 import com.adityachandel.booklore.repository.UserRepository;
@@ -9,13 +10,11 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
-import org.hibernate.Hibernate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -78,7 +77,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private BookLoreUser mapToDTO(BookLoreUserEntity userEntity) {
-        BookLoreUser.UserPermissions permissions = new BookLoreUser.UserPermissions();
+        UserPermissions permissions = new UserPermissions();
         permissions.setAdmin(userEntity.getPermissions().isPermissionAdmin());
         permissions.setCanUpload(userEntity.getPermissions().isPermissionUpload());
         permissions.setCanDownload(userEntity.getPermissions().isPermissionDownload());

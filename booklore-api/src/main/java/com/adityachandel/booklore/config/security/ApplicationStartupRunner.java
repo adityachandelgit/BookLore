@@ -15,7 +15,7 @@ public class ApplicationStartupRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (!userCreatorService.doesAdminUserExist()) {
+        if (!userCreatorService.doesAnyAdminUserExist()) {
             userCreatorService.createAdminUser();
         }
     }

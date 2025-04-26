@@ -3,7 +3,7 @@ package com.adityachandel.booklore.service.user;
 import com.adityachandel.booklore.config.AppProperties;
 import com.adityachandel.booklore.exception.ApiError;
 import com.adityachandel.booklore.model.dto.settings.BookPreferences;
-import com.adityachandel.booklore.model.dto.UserCreateRequest;
+import com.adityachandel.booklore.model.dto.request.UserCreateRequest;
 import com.adityachandel.booklore.model.entity.BookLoreUserEntity;
 import com.adityachandel.booklore.model.entity.LibraryEntity;
 import com.adityachandel.booklore.model.entity.ShelfEntity;
@@ -50,16 +50,18 @@ public class UserCreatorService {
 
         UserPermissionsEntity permissions = new UserPermissionsEntity();
         permissions.setUser(user);
-        permissions.setPermissionUpload(request.isPermissionUpload());
-        permissions.setPermissionDownload(request.isPermissionDownload());
-        permissions.setPermissionEditMetadata(request.isPermissionEditMetadata());
-        permissions.setPermissionEmailBook(request.isPermissionEmailBook());
+        permissions.setPermissionUpload(request.getPermissions().isCanUpload());
+        permissions.setPermissionDownload(request.getPermissions().isCanDownload());
+        permissions.setPermissionEditMetadata(request.getPermissions().isCanEditMetadata());
+        permissions.setPermissionManipulateLibrary(request.getPermissions().isCanManipulateLibrary());
+        permissions.setPermissionEmailBook(request.getPermissions().isCanEmailBook());
+        permissions.setPermissionAdmin(request.getPermissions().isAdmin());
         user.setPermissions(permissions);
 
         user.setBookPreferences(buildDefaultBookPreferences());
 
-        if (request.getSelectedLibraries() != null && !request.getSelectedLibraries().isEmpty()) {
-            List<LibraryEntity> libraries = libraryRepository.findAllById(request.getSelectedLibraries());
+        if (request.getAssignedLibraries() != null && !request.getAssignedLibraries().isEmpty()) {
+            List<LibraryEntity> libraries = libraryRepository.findAllById(request.getAssignedLibraries());
             user.setLibraries(new ArrayList<>(libraries));
         }
 
@@ -141,8 +143,8 @@ public class UserCreatorService {
         return user;
     }
 
-    public boolean doesAdminUserExist() {
-        return userRepository.findByUsername("admin").isPresent();
+    public boolean doesAnyAdminUserExist() {
+        return userRepository.existsWithAdminPermissions();
     }
 
     private BookPreferences buildDefaultBookPreferences() {

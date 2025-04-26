@@ -4,7 +4,7 @@ import {Button} from 'primeng/button';
 import {DialogService, DynamicDialogRef} from 'primeng/dynamicdialog';
 import {CreateUserDialogComponent} from './create-user-dialog/create-user-dialog.component';
 import {TableModule} from 'primeng/table';
-import {NgIf, NgStyle} from '@angular/common';
+import {AsyncPipe, NgIf, NgStyle} from '@angular/common';
 import {User, UserService} from '../../user.service';
 import {MessageService} from 'primeng/api';
 import {Checkbox} from 'primeng/checkbox';
@@ -26,14 +26,16 @@ import {Password} from 'primeng/password';
     MultiSelect,
     Dialog,
     Password,
+    AsyncPipe,
   ],
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.scss'],
 })
 export class AdminComponent implements OnInit {
   ref: DynamicDialogRef | undefined;
+
   private dialogService = inject(DialogService);
-  private userService = inject(UserService);
+  protected userService = inject(UserService);
   private libraryService = inject(LibraryService);
   private messageService = inject(MessageService);
 

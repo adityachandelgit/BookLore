@@ -12,17 +12,8 @@ public class BookLoreUser {
     private boolean isDefaultPassword;
     private String name;
     private String email;
-    private List<Library> assignedLibraries;
-    private UserPermissions permissions;
-    private BookPreferences bookPreferences;
 
-    @Data
-    public static class UserPermissions {
-        private boolean isAdmin;
-        private boolean canUpload;
-        private boolean canDownload;
-        private boolean canEditMetadata;
-        private boolean canManipulateLibrary;
-        private boolean canEmailBook;
-    }
+    private UserPermissions permissions;
+    private List<Library> assignedLibraries;
+    private BookPreferences bookPreferences;
 }

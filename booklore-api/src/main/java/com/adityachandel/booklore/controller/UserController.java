@@ -46,7 +46,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("@securityUtil.isAdmin()")
+    @PreAuthorize("@securityUtil.isAdmin() and not @securityUtil.isSelf(#id)")
     public void deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
     }

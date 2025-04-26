@@ -1,6 +1,7 @@
 package com.adityachandel.booklore.mapper;
 
 import com.adityachandel.booklore.model.dto.BookLoreUser;
+import com.adityachandel.booklore.model.dto.UserPermissions;
 import com.adityachandel.booklore.model.entity.BookLoreUserEntity;
 import com.adityachandel.booklore.model.entity.UserPermissionsEntity;
 import org.mapstruct.Mapper;
@@ -13,11 +14,11 @@ public interface BookLoreUserMapper {
     @Mapping(source = "libraries", target = "assignedLibraries")
     BookLoreUser toDto(BookLoreUserEntity entity);
 
-    default BookLoreUser.UserPermissions mapPermissions(UserPermissionsEntity permissions) {
+    default UserPermissions mapPermissions(UserPermissionsEntity permissions) {
         if (permissions == null) {
             return null;
         }
-        BookLoreUser.UserPermissions dto = new BookLoreUser.UserPermissions();
+        UserPermissions dto = new UserPermissions();
         dto.setAdmin(permissions.isPermissionAdmin());
         dto.setCanUpload(permissions.isPermissionUpload());
         dto.setCanDownload(permissions.isPermissionDownload());
