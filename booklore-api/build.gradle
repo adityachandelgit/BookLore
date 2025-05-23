@@ -3,6 +3,7 @@ plugins {
     id 'org.springframework.boot' version '3.4.4'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'org.hibernate.orm' version '6.6.13.Final'
+    id 'jacoco' 
 }
 
 group = 'com.adityachandel'
@@ -67,6 +68,14 @@ dependencies {
 
     // --- API Documentation ---
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6'
+
+    // --- Testing ---
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+    exclude group: 'org.mockito', module: 'mockito-core' // drop old 2.x
+    }
+    testImplementation 'org.mockito:mockito-core:5.17.0'  // Java 21‑compatible
+    testImplementation 'org.assertj:assertj-core:3.25.3'
+    testImplementation 'com.h2database:h2:2.1.214'
 }
 
 hibernate {
@@ -74,3 +83,48 @@ hibernate {
         enableAssociationManagement = true
     }
 }
+
+/* ───── Tasks ──────────────────────────────────────────────────────────── */
+
+// Run JUnit 5 (Jupiter) and log pass / skip / fail events
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+/* ───── JaCoCo configuration ───────────────────────────────────────────── */
+
+jacoco {
+    toolVersion = '0.8.13'
+}
+
+tasks.named('jacocoTestReport', JacocoReport) {
+    dependsOn tasks.test
+
+    reports {
+        xml.required  = true
+        html.required = true
+    }
+    sourceSets sourceSets.main
+}
+
+tasks.named('jacocoTestCoverageVerification', JacocoCoverageVerification) {
+    dependsOn tasks.test
+
+    violationRules {
+        rule {
+            element = 'BUNDLE'          // apply to whole codebase
+
+            limit {                     // ← singular, not limits { … }
+                counter = 'LINE'
+                value   = 'COVEREDRATIO'
+                minimum = 0.05 as BigDecimal // 5% temp - 70% line coverage once finished
+            }
+        }
+    }
+}
+
+/* Make “gradle check” run tests, generate coverage, and enforce threshold */
+tasks.check.dependsOn 'jacocoTestReport', 'jacocoTestCoverageVerification'

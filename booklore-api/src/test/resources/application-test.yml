@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:booklore_test;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  flyway:
+    enabled: false          # ← skip migrations in unit tests
