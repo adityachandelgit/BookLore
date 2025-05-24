@@ -126,6 +126,7 @@ public class AmazonBookParser implements BookParser {
                 .seriesTotal(getSeriesTotal(doc))
                 .isbn13(getIsbn13(doc))
                 .isbn10(getIsbn10(doc))
+                .asin(amazonBookId)
                 .publisher(getPublisher(doc))
                 .publishedDate(getPublicationDate(doc))
                 .language(getLanguage(doc))

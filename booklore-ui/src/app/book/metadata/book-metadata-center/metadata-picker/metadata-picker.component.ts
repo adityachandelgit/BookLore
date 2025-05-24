@@ -54,6 +54,7 @@ export class MetadataPickerComponent implements OnInit {
     {label: 'Book #', controlName: 'seriesNumber', lockedKey: 'seriesNumberLocked', fetchedKey: 'seriesNumber'},
     {label: 'Total Books', controlName: 'seriesTotal', lockedKey: 'seriesTotalLocked', fetchedKey: 'seriesTotal'},
     {label: 'ISBN-13', controlName: 'isbn13', lockedKey: 'isbn13Locked', fetchedKey: 'isbn13'},
+    {label: 'ASIN', controlName: 'asin', lockedKey: 'asinLocked', fetchedKey: 'asin'},
     {label: 'Amazon Reviews', controlName: 'amazonReviewCount', lockedKey: 'amazonReviewCountLocked', fetchedKey: 'amazonReviewCount'},
     {label: 'Amazon Rating', controlName: 'amazonRating', lockedKey: 'amazonRatingLocked', fetchedKey: 'amazonRating'},
     {label: 'Goodreads Reviews', controlName: 'goodreadsReviewCount', lockedKey: 'goodreadsReviewCountLocked', fetchedKey: 'goodreadsReviewCount'},
@@ -87,6 +88,7 @@ export class MetadataPickerComponent implements OnInit {
       publishedDate: new FormControl(''),
       isbn10: new FormControl(''),
       isbn13: new FormControl(''),
+      asin: new FormControl(''),
       description: new FormControl(''),
       pageCount: new FormControl(''),
       language: new FormControl(''),
@@ -107,6 +109,7 @@ export class MetadataPickerComponent implements OnInit {
       publishedDateLocked: new FormControl(false),
       isbn10Locked: new FormControl(false),
       isbn13Locked: new FormControl(false),
+      asinLocked: new FormControl(false),
       descriptionLocked: new FormControl(false),
       pageCountLocked: new FormControl(false),
       languageLocked: new FormControl(false),
@@ -136,6 +139,7 @@ export class MetadataPickerComponent implements OnInit {
           publishedDate: metadata.publishedDate || null,
           isbn10: metadata.isbn10 || null,
           isbn13: metadata.isbn13 || null,
+          asin: metadata.asin || null,
           description: metadata.description || null,
           pageCount: metadata.pageCount || null,
           language: metadata.language || null,
@@ -156,6 +160,7 @@ export class MetadataPickerComponent implements OnInit {
           publishedDateLocked: metadata.publishedDateLocked || false,
           isbn10Locked: metadata.isbn10Locked || false,
           isbn13Locked: metadata.isbn13Locked || false,
+          asinLocked: metadata.asinLocked || false,
           descriptionLocked: metadata.descriptionLocked || false,
           pageCountLocked: metadata.pageCountLocked || false,
           languageLocked: metadata.languageLocked || false,
@@ -178,6 +183,7 @@ export class MetadataPickerComponent implements OnInit {
         if (metadata.languageLocked) this.metadataForm.get('language')?.disable();
         if (metadata.isbn10Locked) this.metadataForm.get('isbn10')?.disable();
         if (metadata.isbn13Locked) this.metadataForm.get('isbn13')?.disable();
+        if (metadata.asinLocked) this.metadataForm.get('asin')?.disable();
         if (metadata.amazonReviewCountLocked) this.metadataForm.get('amazonReviewCount')?.disable();
         if (metadata.amazonRatingLocked) this.metadataForm.get('amazonRating')?.disable();
         if (metadata.goodreadsReviewCountLocked) this.metadataForm.get('goodreadsReviewCount')?.disable();
@@ -220,6 +226,7 @@ export class MetadataPickerComponent implements OnInit {
       publishedDate: this.metadataForm.get('publishedDate')?.value || this.copiedFields['publishedDate'] ? this.getValueOrCopied('publishedDate') : '',
       isbn10: this.metadataForm.get('isbn10')?.value || this.copiedFields['isbn10'] ? this.getValueOrCopied('isbn10') : '',
       isbn13: this.metadataForm.get('isbn13')?.value || this.copiedFields['isbn13'] ? this.getValueOrCopied('isbn13') : '',
+      asin: this.metadataForm.get('asin')?.value || this.copiedFields['asin'] ? this.getValueOrCopied('asin') : '',
       description: this.metadataForm.get('description')?.value || this.copiedFields['description'] ? this.getValueOrCopied('description') : '',
       pageCount: this.metadataForm.get('pageCount')?.value || this.copiedFields['pageCount'] ? this.getPageCountOrCopied() : null,
       language: this.metadataForm.get('language')?.value || this.copiedFields['language'] ? this.getValueOrCopied('language') : '',
@@ -240,6 +247,7 @@ export class MetadataPickerComponent implements OnInit {
       publishedDateLocked: this.metadataForm.get('publishedDateLocked')?.value,
       isbn10Locked: this.metadataForm.get('isbn10Locked')?.value,
       isbn13Locked: this.metadataForm.get('isbn13Locked')?.value,
+      asinLocked: this.metadataForm.get('asin')?.value,
       descriptionLocked: this.metadataForm.get('descriptionLocked')?.value,
       pageCountLocked: this.metadataForm.get('pageCountLocked')?.value,
       languageLocked: this.metadataForm.get('languageLocked')?.value,

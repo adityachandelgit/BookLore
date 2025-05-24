@@ -51,6 +51,9 @@ public class BookMetadataEntity {
     @Column(name = "isbn_10", length = 10)
     private String isbn10;
 
+    @Column(name = "asin", length = 10)
+    private String asin;
+
     @Column(name = "page_count")
     private Integer pageCount;
 
@@ -103,6 +106,9 @@ public class BookMetadataEntity {
 
     @Column(name = "isbn_10_locked")
     private Boolean isbn10Locked = Boolean.FALSE;
+
+    @Column(name = "asin_locked")
+    private Boolean asinLocked = Boolean.FALSE;
 
     @Column(name = "page_count_locked")
     private Boolean pageCountLocked = Boolean.FALSE;
@@ -181,6 +187,7 @@ public class BookMetadataEntity {
         this.descriptionLocked = lock;
         this.isbn13Locked = lock;
         this.isbn10Locked = lock;
+        this.asinLocked = lock;
         this.pageCountLocked = lock;
         this.thumbnailLocked = lock;
         this.languageLocked = lock;
@@ -206,6 +213,7 @@ public class BookMetadataEntity {
                 || Boolean.TRUE.equals(this.descriptionLocked)
                 || Boolean.TRUE.equals(this.isbn13Locked)
                 || Boolean.TRUE.equals(this.isbn10Locked)
+                || Boolean.TRUE.equals(this.asinLocked)
                 || Boolean.TRUE.equals(this.pageCountLocked)
                 || Boolean.TRUE.equals(this.thumbnailLocked)
                 || Boolean.TRUE.equals(this.languageLocked)
@@ -231,6 +239,7 @@ public class BookMetadataEntity {
                 && Boolean.TRUE.equals(this.descriptionLocked)
                 && Boolean.TRUE.equals(this.isbn13Locked)
                 && Boolean.TRUE.equals(this.isbn10Locked)
+                && Boolean.TRUE.equals(this.asinLocked)
                 && Boolean.TRUE.equals(this.pageCountLocked)
                 && Boolean.TRUE.equals(this.thumbnailLocked)
                 && Boolean.TRUE.equals(this.languageLocked)

@@ -69,6 +69,7 @@ export class MetadataEditorComponent implements OnInit {
       publishedDate: new FormControl(''),
       isbn10: new FormControl(''),
       isbn13: new FormControl(''),
+      asin: new FormControl(''),
       description: new FormControl(''),
       pageCount: new FormControl(''),
       language: new FormControl(''),
@@ -90,6 +91,7 @@ export class MetadataEditorComponent implements OnInit {
       publishedDateLocked: new FormControl(false),
       isbn10Locked: new FormControl(false),
       isbn13Locked: new FormControl(false),
+      asinLocked: new FormControl(false),
       descriptionLocked: new FormControl(false),
       pageCountLocked: new FormControl(false),
       languageLocked: new FormControl(false),
@@ -125,6 +127,7 @@ export class MetadataEditorComponent implements OnInit {
           publishedDate: metadata.publishedDate || null,
           isbn10: metadata.isbn10 || null,
           isbn13: metadata.isbn13 || null,
+          asin: metadata.asin || null,
           description: metadata.description || null,
           pageCount: metadata.pageCount || null,
           language: metadata.language || null,
@@ -146,6 +149,7 @@ export class MetadataEditorComponent implements OnInit {
           publishedDateLocked: metadata.publishedDateLocked || false,
           isbn10Locked: metadata.isbn10Locked || false,
           isbn13Locked: metadata.isbn13Locked || false,
+          asinLocked: metadata.asinLocked || false,
           descriptionLocked: metadata.descriptionLocked || false,
           pageCountLocked: metadata.pageCountLocked || false,
           languageLocked: metadata.languageLocked || false,
@@ -171,6 +175,7 @@ export class MetadataEditorComponent implements OnInit {
           { key: 'languageLocked', control: 'language' },
           { key: 'isbn10Locked', control: 'isbn10' },
           { key: 'isbn13Locked', control: 'isbn13' },
+          { key: 'asinLocked', control: 'asin'},
           { key: 'amazonReviewCountLocked', control: 'amazonReviewCount' },
           { key: 'amazonRatingLocked', control: 'amazonRating' },
           { key: 'goodreadsReviewCountLocked', control: 'goodreadsReviewCount' },
@@ -210,8 +215,13 @@ export class MetadataEditorComponent implements OnInit {
         this.messageService.add({severity: 'info', summary: 'Success', detail: 'Book metadata updated'});
         this.metadataCenterService.emitMetadata(response);
       },
-      error: () => {
-        this.messageService.add({severity: 'error', summary: 'Error', detail: 'Failed to update book metadata'});
+      error: (err) => {
+        console.error('Update metadata failed:', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err?.error?.message || 'Failed to update book metadata'
+        });
       }
     });
   }
@@ -276,6 +286,7 @@ export class MetadataEditorComponent implements OnInit {
       publishedDate: this.metadataForm.get('publishedDate')?.value,
       isbn10: this.metadataForm.get('isbn10')?.value,
       isbn13: this.metadataForm.get('isbn13')?.value,
+      asin: this.metadataForm.get('asin')?.value,
       description: this.metadataForm.get('description')?.value,
       pageCount: this.metadataForm.get('pageCount')?.value,
       rating: this.metadataForm.get('rating')?.value,
@@ -297,6 +308,7 @@ export class MetadataEditorComponent implements OnInit {
       publishedDateLocked: this.metadataForm.get('publishedDateLocked')?.value,
       isbn10Locked: this.metadataForm.get('isbn10Locked')?.value,
       isbn13Locked: this.metadataForm.get('isbn13Locked')?.value,
+      asinLocked: this.metadataForm.get('asinLocked')?.value,
       descriptionLocked: this.metadataForm.get('descriptionLocked')?.value,
       pageCountLocked: this.metadataForm.get('pageCountLocked')?.value,
       languageLocked: this.metadataForm.get('languageLocked')?.value,

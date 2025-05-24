@@ -184,6 +184,14 @@
             </div>
           </div>
           <div class="flex flex-col gap-1 w-1/4">
+            <label for="asin">ASIN</label>
+            <div class="flex justify-between items-center gap-2">
+              <input pInputText id="asin" formControlName="asin" class="w-full"/>
+              <p-button *ngIf="!metadata['asinLocked']" icon="pi pi-lock-open" [outlined]="true" (onClick)="toggleLock('asin')" severity="success"></p-button>
+              <p-button *ngIf="metadata['asinLocked']" icon="pi pi-lock" [outlined]="true" (onClick)="toggleLock('asin')" severity="warn"></p-button>
+            </div>
+          </div>
+          <div class="flex flex-col gap-1 w-1/4">
             <label for="reviewCount">Rating Count (Legacy)</label>
             <div class="flex justify-between items-center gap-2">
               <input [disabled]="true" pInputText id="reviewCount" formControlName="reviewCount" class="w-full"/>

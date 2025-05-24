@@ -71,7 +71,9 @@ public class BookMetadataUpdater {
         if ((metadata.getIsbn13Locked() == null || !metadata.getIsbn13Locked()) && newMetadata.getIsbn13() != null) {
             metadata.setIsbn13(newMetadata.getIsbn13().isBlank() ? null : newMetadata.getIsbn13());
         }
-
+        if ((metadata.getAsinLocked() == null || !metadata.getAsinLocked()) && newMetadata.getAsin() != null) {
+            metadata.setAsin(newMetadata.getAsin().isBlank() ? null : newMetadata.getAsin());
+        }
         if ((metadata.getDescriptionLocked() == null || !metadata.getDescriptionLocked()) && newMetadata.getDescription() != null) {
             metadata.setDescription(newMetadata.getDescription().isBlank() ? null : newMetadata.getDescription());
         }
@@ -215,6 +217,9 @@ public class BookMetadataUpdater {
         }
         if (newMetadata.getIsbn10Locked() != null) {
             metadata.setIsbn10Locked(newMetadata.getIsbn10Locked());
+        }
+        if (newMetadata.getAsinLocked() != null) {
+            metadata.setAsinLocked(newMetadata.getAsinLocked());
         }
         if (newMetadata.getPageCountLocked() != null) {
             metadata.setPageCountLocked(newMetadata.getPageCountLocked());

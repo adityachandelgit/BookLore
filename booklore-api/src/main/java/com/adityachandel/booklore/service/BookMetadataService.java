@@ -200,6 +200,7 @@ public class BookMetadataService {
             metadataCombined.setPublishedDate(metadata.getPublishedDate() != null ? metadata.getPublishedDate() : metadataCombined.getPublishedDate());
             metadataCombined.setIsbn10(metadata.getIsbn10() != null ? metadata.getIsbn10() : metadataCombined.getIsbn10());
             metadataCombined.setIsbn13(metadata.getIsbn13() != null ? metadata.getIsbn13() : metadataCombined.getIsbn13());
+            metadataCombined.setAsin(metadata.getAsin() != null ? metadata.getAsin() : metadataCombined.getAsin());
             metadataCombined.setPageCount(metadata.getPageCount() != null ? metadata.getPageCount() : metadataCombined.getPageCount());
             metadataCombined.setLanguage(metadata.getLanguage() != null ? metadata.getLanguage() : metadataCombined.getLanguage());
             metadataCombined.setRating(metadata.getRating() != null ? metadata.getRating() : metadataCombined.getRating());
@@ -334,6 +335,7 @@ public class BookMetadataService {
     private FetchMetadataRequest buildFetchMetadataRequestFromBook(Book book) {
         return FetchMetadataRequest.builder()
                 .isbn(book.getMetadata().getIsbn10())
+                .asin(book.getMetadata().getAsin())
                 .author(String.join(", ", book.getMetadata().getAuthors()))
                 .title(book.getMetadata().getTitle())
                 .bookId(book.getId())
@@ -374,6 +376,9 @@ public class BookMetadataService {
                 break;
             case "isbn13":
                 existingMetadata.setIsbn13Locked(isLocked);
+                break;
+            case "asin":
+                existingMetadata.setAsinLocked(isLocked);
                 break;
             case "description":
                 existingMetadata.setDescriptionLocked(isLocked);

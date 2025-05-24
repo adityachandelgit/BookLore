@@ -31,6 +31,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -134,12 +135,38 @@ public class EpubProcessor implements FileProcessor {
 
                 List<String> identifiers = epubMetadata.getIdentifiers().stream()
                         .map(Identifier::getValue)
+                        .filter(Objects::nonNull)
+                        .map(String::trim)
+                        .map(id -> id.contains(":") ? id.substring(id.indexOf(":") + 1) : id) // strip prefix
+                        .map(id -> id.replace("-", "")) // remove dashes
                         .toList();
+                        log.debug("Found {} identifier nodes.", identifiers.size());
+                        log.debug("Normalized identifiers: {}", identifiers);
+
+
                 if (!identifiers.isEmpty()) {
-                    String isbn13 = identifiers.stream().filter(id -> id.length() == 13).findFirst().orElse(null);
-                    String isbn10 = identifiers.stream().filter(id -> id.length() == 10).findFirst().orElse(null);
+                    // Checking for ISBN 13 (strict 13-digit numeric)
+                    String isbn13 = identifiers.stream()
+                            .filter(id -> id.length() == 13 && id.matches("\\d{13}"))
+                            .findFirst()
+                            .orElse(null);
+
+                    // Checking for ISBN 10 (strict 10-digit format or ends in X)
+                    String isbn10 = identifiers.stream()
+                            .filter(id -> id.length() == 10 && id.matches("\\d{9}[\\dXx]"))
+                            .findFirst()
+                            .orElse(null);
+
+                    // Checking for ASIN (alphanumeric 10 chars, must not be ISBN-10)
+                    String asin = identifiers.stream()
+                            .filter(id -> id.length() == 10 && id.matches("^[A-Z0-9]{10}$"))
+                            .filter(id -> !id.equalsIgnoreCase(isbn10))
+                            .findFirst()
+                            .orElse(null);
+
                     bookMetadata.setIsbn13(truncate(isbn13, 64));
                     bookMetadata.setIsbn10(truncate(isbn10, 64));
+                    bookMetadata.setAsin(truncate(asin, 20));
                 }
 
                 bookMetadata.setLanguage(truncate(

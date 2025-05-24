@@ -26,6 +26,7 @@ public class BookMetadata {
     private Integer seriesTotal;
     private String isbn13;
     private String isbn10;
+    private String asin;
     private Integer pageCount;
     private String language;
     private Double rating;
@@ -54,6 +55,7 @@ public class BookMetadata {
     private Boolean seriesTotalLocked;
     private Boolean isbn13Locked;
     private Boolean isbn10Locked;
+    private Boolean asinLocked;
     private Boolean pageCountLocked;
     private Boolean languageLocked;
     private Boolean ratingLocked;

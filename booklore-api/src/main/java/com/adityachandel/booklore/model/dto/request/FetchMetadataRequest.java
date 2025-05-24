@@ -14,4 +14,5 @@ public class FetchMetadataRequest {
     private String isbn;
     private String title;
     private String author;
+    private String asin;
 }
