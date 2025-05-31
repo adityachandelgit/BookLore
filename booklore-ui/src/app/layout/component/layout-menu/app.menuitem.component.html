@@ -39,7 +39,7 @@
       [rounded]="true"
       [label]="hovered ? '' : (item.bookCount$ | async)?.toString() || ''"
       [icon]="hovered ? 'pi pi-ellipsis-v' : ''"
-      [style.width]="'30px'"
+      [style.min-width]="'4ch'"
       [style.height]="'30px'"
       [style.display]="'flex'">
     </p-button>
