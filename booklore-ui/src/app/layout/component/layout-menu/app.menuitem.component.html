@@ -2,8 +2,8 @@
   <div *ngIf="root && item.visible !== false" class="layout-menuitem-root-text">{{ item.label }}</div>
 
   <a *ngIf="(!item.routerLink || item.items) && item.visible !== false" [attr.href]="item.url"
-     (click)="itemClick($event)"
-     [ngClass]="item.class" [attr.target]="item.target" tabindex="0" pRipple>
+    (click)="itemClick($event)"
+    [ngClass]="item.class" [attr.target]="item.target" tabindex="0" pRipple>
     <i [ngClass]="item.icon" class="layout-menuitem-icon"></i>
     <span class="layout-menuitem-text">
       {{ item.label }}
@@ -13,14 +13,14 @@
 
   <div class="flex flex-row items-center justify-between">
     <a *ngIf="(item.routerLink && !item.items) && item.visible !== false" (click)="itemClick($event)"
-       [ngClass]="item.class"
-       [routerLink]="item.routerLink" routerLinkActive="active-route"
-       [routerLinkActiveOptions]="item.routerLinkActiveOptions || { paths: 'exact', queryParams: 'ignored', matrixParams: 'ignored', fragment: 'ignored' }"
-       [fragment]="item.fragment" [queryParamsHandling]="item.queryParamsHandling"
-       [preserveFragment]="item.preserveFragment"
-       [skipLocationChange]="item.skipLocationChange" [replaceUrl]="item.replaceUrl" [state]="item.state"
-       [queryParams]="item.queryParams"
-       [attr.target]="item.target" tabindex="0" pRipple>
+      [ngClass]="item.class"
+      [routerLink]="item.routerLink" routerLinkActive="active-route"
+      [routerLinkActiveOptions]="item.routerLinkActiveOptions || { paths: 'exact', queryParams: 'ignored', matrixParams: 'ignored', fragment: 'ignored' }"
+      [fragment]="item.fragment" [queryParamsHandling]="item.queryParamsHandling"
+      [preserveFragment]="item.preserveFragment"
+      [skipLocationChange]="item.skipLocationChange" [replaceUrl]="item.replaceUrl" [state]="item.state"
+      [queryParams]="item.queryParams"
+      [attr.target]="item.target" tabindex="0" pRipple>
       <i [ngClass]="item.icon" class="layout-menuitem-icon"></i>
       <span class="layout-menuitem-text w-full">
         {{ item.label }}
@@ -39,15 +39,15 @@
       [rounded]="true"
       [label]="hovered ? '' : (item.bookCount$ | async)?.toString() || ''"
       [icon]="hovered ? 'pi pi-ellipsis-v' : ''"
-      [style.width]="'30px'"
-      [style.height]="'30px'"
-      [style.display]="'flex'">
+      [style.width]="'40px'"
+      [style.height]="'30px'">
     </p-button>
     <p-menu #entitymenu [model]="item.menu" [popup]="true" appendTo="body"></p-menu>
   </ng-container>
 
   <ng-container *ngIf="item.type === 'Library' && (!admin && !canManipulateLibrary) || item.type === 'All Books' || item.label === 'Unshelved'">
-    <p class="text-[var(--primary-color)] pr-1">
+    <p class="text-[var(--primary-color)] pr-1"
+    [style.padding-right]="'10px'">
       {{ (item.bookCount$ | async)?.toString() || '0' }}
     </p>
   </ng-container>
