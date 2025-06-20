@@ -24,9 +24,8 @@
         @if (userService.userState$ | async; as userData) {
           <li>
             @if (userData.permissions.canManipulateLibrary || userData.permissions.admin) {
-              <a class="topbar-item">
-                <i class="pi pi-plus-circle text-surface-700 dark:text-surface-100" (click)="openLibraryCreatorDialog()"
-                pTooltip="Create New Library" tooltipPosition="top"></i>
+              <button class="topbar-item" (click)="openLibraryCreatorDialog()" pTooltip="Create New Library" tooltipPosition="top">
+                <i class="pi pi-plus-circle text-surface-700 dark:text-surface-100"></i>
               </a>
             }
           </li>
@@ -34,17 +33,15 @@
         @if (userService.userState$ | async; as userData) {
           <li>
             @if (userData.permissions.canManipulateLibrary || userData.permissions.admin) {
-              <a class="topbar-item">
-                <i class="pi pi-upload text-surface-700 dark:text-surface-100" (click)="openFileUploadDialog()"
-                pTooltip="Upload Book" tooltipPosition="top"></i>
+              <button class="topbar-item" (click)="openFileUploadDialog()" pTooltip="Upload Book" tooltipPosition="top">
+                <i class="pi pi-upload text-surface-700 dark:text-surface-100"></i>
               </a>
             }
           </li>
         }
         <li>
-          <a class="topbar-item">
-            <i class="pi pi-cog text-surface-700 dark:text-surface-100" (click)="navigateToSettings()"
-            pTooltip="Settings" tooltipPosition="top"></i>
+          <button class="topbar-item" (click)="navigateToSettings()" pTooltip="Settings" tooltipPosition="top">
+            <i class="pi pi-cog text-surface-700 dark:text-surface-100"></i>
           </a>
         </li>
       </div>
