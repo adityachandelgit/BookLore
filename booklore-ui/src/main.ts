@@ -14,8 +14,9 @@ import {routes} from './app/app.routes';
 import {AuthInterceptorService} from './app/auth-interceptor.service';
 import {AuthService, websocketInitializer} from './app/core/service/auth.service';
 import {provideOAuthClient} from 'angular-oauth2-oidc';
-import {APP_INITIALIZER, provideAppInitializer} from '@angular/core';
+import {APP_INITIALIZER, provideAppInitializer, isDevMode} from '@angular/core';
 import {initializeAuthFactory} from './app/auth-initializer';
+import { provideServiceWorker } from '@angular/service-worker';
 
 bootstrapApplication(AppComponent, {
   providers: [
@@ -54,7 +55,10 @@ bootstrapApplication(AppComponent, {
           darkModeSelector: '.p-dark'
         }
       }
-    })
+    }), provideServiceWorker('ngsw-worker.js', {
+            enabled: !isDevMode(),
+            registrationStrategy: 'registerWhenStable:30000'
+          })
   ]
 }).catch(err => console.error(err));
 
