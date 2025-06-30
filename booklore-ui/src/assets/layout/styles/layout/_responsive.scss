@@ -1,7 +1,7 @@
 @use "variables";
 
 @media screen and (min-width: 1960px) {
-  .layout-main, .landing-wrapper {
+  .layout-main {
     width: 100%;
     margin-left: auto !important;
     margin-right: auto !important;
@@ -47,7 +47,7 @@
 
         .layout-main-container {
           margin-left: 0;
-          padding: 5rem 1.1rem 2rem 3.6rem;
+          padding: 5rem 1rem 2rem 1.5rem;
         }
       }
     }
@@ -85,7 +85,7 @@
       z-index: 998;
       width: 100%;
       height: 100%;
-      background-color: var(--maskbg);
+      background-color: rgba(0, 0, 0, 0.6);
     }
 
     &.layout-mobile-active {
