@@ -10,6 +10,9 @@ import { SlicePipe } from '@angular/common';
 import {Divider} from 'primeng/divider';
 import {UrlHelperService} from '../../../utilities/service/url-helper.service';
 import {Router} from '@angular/router';
+import {OverlayPanelModule} from 'primeng/overlaypanel';
+import {Tooltip} from 'primeng/tooltip';
+import {Popover} from 'primeng/popover';
 
 @Component({
   selector: 'app-book-searcher',
@@ -19,8 +22,11 @@ import {Router} from '@angular/router';
     InputTextModule,
     Button,
     SlicePipe,
-    Divider
-],
+    Divider,
+    OverlayPanelModule,
+    Tooltip,
+    Popover
+  ],
   styleUrls: ['./book-searcher.component.scss'],
   standalone: true
 })
