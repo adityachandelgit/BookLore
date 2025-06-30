@@ -6,13 +6,13 @@ import {FormsModule} from '@angular/forms';
 import {InputTextModule} from 'primeng/inputtext';
 import {BookService} from '../../service/book.service';
 import {Button} from 'primeng/button';
-import { SlicePipe } from '@angular/common';
+import {SlicePipe} from '@angular/common';
 import {Divider} from 'primeng/divider';
 import {UrlHelperService} from '../../../utilities/service/url-helper.service';
 import {Router} from '@angular/router';
 import {OverlayPanelModule} from 'primeng/overlaypanel';
-import {Tooltip} from 'primeng/tooltip';
-import {Popover} from 'primeng/popover';
+import {IconField} from 'primeng/iconfield';
+import {InputIcon} from 'primeng/inputicon';
 
 @Component({
   selector: 'app-book-searcher',
@@ -24,8 +24,8 @@ import {Popover} from 'primeng/popover';
     SlicePipe,
     Divider,
     OverlayPanelModule,
-    Tooltip,
-    Popover
+    IconField,
+    InputIcon
   ],
   styleUrls: ['./book-searcher.component.scss'],
   standalone: true
@@ -39,6 +39,16 @@ export class BookSearcherComponent implements OnInit, OnDestroy {
   private bookService = inject(BookService);
   private router = inject(Router);
   protected urlHelper = inject(UrlHelperService);
+
+  isSearchDropdownOpen = false;
+
+  toggleSearchInputDropdown() {
+    this.isSearchDropdownOpen = !this.isSearchDropdownOpen;
+  }
+
+  closeSearchDropdown() {
+    this.isSearchDropdownOpen = false;
+  }
 
   ngOnInit(): void {
     this.initializeSearch();
