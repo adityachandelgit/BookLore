@@ -115,7 +115,7 @@ public class LibraryProcessingService {
                 processFolderCreate(libraryEntity, libraryPath, path);
             } else if (eventKind == StandardWatchEventKinds.ENTRY_DELETE) {
                 log.info("[PROCESS] Detected folder deletion: '{}'", path);
-                processFolderDelete(libraryEntity, libraryPath, path);
+                processFolderDelete(libraryEntity, path);
             } else {
                 log.info("[PROCESS] Ignored directory event '{}' for '{}'", eventKind.name(), path);
             }
@@ -132,7 +132,7 @@ public class LibraryProcessingService {
             processFileCreate(libraryEntity, libraryPath, path);
         } else if (eventKind == StandardWatchEventKinds.ENTRY_DELETE) {
             log.info("[PROCESS] Detected file deletion: '{}'", path);
-            processFileDelete(libraryEntity, libraryPath, path);
+            processFileDelete(libraryEntity, path);
         } else {
             log.info("[PROCESS] Ignored file event '{}' for '{}'", eventKind.name(), path);
         }
@@ -240,7 +240,7 @@ public class LibraryProcessingService {
     }
 
     @Transactional
-    public void processFileDelete(LibraryEntity libraryEntity, String libraryPath, Path path) {
+    public void processFileDelete(LibraryEntity libraryEntity, Path path) {
         String fileName = path.getFileName().toString();
         log.info("[DELETE] Event start for file: '{}', library: '{}', path: '{}'", fileName, libraryEntity.getName(), path.toString());
 
@@ -321,7 +321,7 @@ public class LibraryProcessingService {
     }
 
     @Transactional
-    public void processFolderDelete(LibraryEntity libraryEntity, String libraryPath, Path deletedFolderPath) {
+    public void processFolderDelete(LibraryEntity libraryEntity, Path deletedFolderPath) {
         log.info("🗑️ Folder deleted: {}", deletedFolderPath);
 
         List<BookEntity> booksToStage = bookRepository.findAllByLibraryId(libraryEntity.getId()).stream()
@@ -605,7 +605,7 @@ public class LibraryProcessingService {
         return libraryFiles;
     }
 
-    private boolean isRelevantBookFile(Path path) {
+    public boolean isRelevantBookFile(Path path) {
         String name = path.getFileName().toString().toLowerCase();
         return name.endsWith(".pdf")
                 || name.endsWith(".epub")
