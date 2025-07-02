@@ -59,6 +59,12 @@ public class BookEntity {
     @Column(name = "added_on")
     private Instant addedOn;
 
+    @Column(name = "initial_hash", length = 128, updatable = false)
+    private String initialHash;
+
+    @Column(name = "current_hash", length = 128)
+    private String currentHash;
+
     @ManyToMany
     @JoinTable(
             name = "book_shelf_mapping",

@@ -87,4 +87,6 @@ hibernate {
 
 test {
     useJUnitPlatform()
+    jvmArgs("-XX:+EnableDynamicAgentLoading")
 }
+

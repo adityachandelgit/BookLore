@@ -6,6 +6,7 @@ import {MetadataFetchOptionsComponent} from '../../metadata/metadata-options-dia
 import {MetadataRefreshType} from '../../metadata/model/request/metadata-refresh-type.enum';
 import {BulkMetadataUpdateComponent} from '../../metadata/bulk-metadata-update-component/bulk-metadata-update-component';
 import {MultiBookMetadataEditorComponent} from '../../metadata/multi-book-metadata-editor-component/multi-book-metadata-editor-component';
+import {FileMoverComponent} from '../../../file-mover-component/file-mover-component';
 
 @Injectable({providedIn: 'root'})
 export class BookDialogHelperService {
@@ -84,6 +85,23 @@ export class BookDialogHelperService {
       },
       data: {
         bookIds: Array.from(bookIds)
+      },
+    });
+  }
+
+  openFileMoverDialog(selectedBooks: Set<number>) {
+    return this.dialogService.open(FileMoverComponent, {
+      header: 'Move Files',
+      showHeader: true,
+      modal: true,
+      closable: true,
+      closeOnEscape: false,
+      dismissableMask: false,
+      style: {
+        width: '90vw'
+      },
+      data: {
+        bookIds: selectedBooks
       },
     });
   }

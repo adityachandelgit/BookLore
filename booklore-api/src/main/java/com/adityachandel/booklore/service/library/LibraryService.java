@@ -118,7 +118,7 @@ public class LibraryService {
             }
         } else {
             for (LibraryPathEntity pathEntity : savedLibrary.getLibraryPaths()) {
-                monitoringService.unregisterPath(pathEntity.getPath());
+                monitoringService.unregisterPath(Path.of(pathEntity.getPath()));
             }
         }
 
@@ -212,7 +212,7 @@ public class LibraryService {
         LibraryEntity library = libraryRepository.findById(id).orElseThrow(() -> ApiError.LIBRARY_NOT_FOUND.createException(id));
         library.getLibraryPaths().forEach(libraryPath -> {
             Path path = Paths.get(libraryPath.getPath());
-            monitoringService.unregisterPath(path.toString());
+            monitoringService.unregisterPath(Path.of(path.toString()));
         });
         Set<Long> bookIds = library.getBookEntities().stream().map(BookEntity::getId).collect(Collectors.toSet());
         fileProcessingUtils.deleteBookCovers(bookIds);

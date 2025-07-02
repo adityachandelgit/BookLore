@@ -61,6 +61,10 @@ public class EpubProcessor implements FileProcessor {
     protected Book processNewFile(LibraryFile libraryFile) {
         BookEntity bookEntity = bookCreatorService.createShellBook(libraryFile, BookFileType.EPUB);
         setBookMetadata(bookEntity);
+
+        String hash = FileUtils.computeFileHash(bookEntity);
+        bookEntity.setCurrentHash(hash);
+
         Float score = metadataMatchService.calculateMatchScore(bookEntity);
         bookEntity.setMetadataMatchScore(score);
         if (generateCover(bookEntity)) {

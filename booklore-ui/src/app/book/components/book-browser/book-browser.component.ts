@@ -670,4 +670,8 @@ export class BookBrowserComponent implements OnInit, AfterViewInit {
   multiBookEditMetadata(): void {
     this.dialogHelperService.openMultibookMetadataEditerDialog(this.selectedBooks);
   }
+
+  moveFiles() {
+    this.dialogHelperService.openFileMoverDialog(this.selectedBooks);
+  }
 }

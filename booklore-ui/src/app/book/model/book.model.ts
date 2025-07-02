@@ -15,6 +15,8 @@ export interface Book {
   pdfProgress?: PdfProgress;
   cbxProgress?: CbxProgress;
   filePath?: string;
+  fileSubPath?: string;
+  fileName?: string;
   fileSizeKb?: number;
   seriesCount?: number | null;
   metadataMatchScore?: number | null;

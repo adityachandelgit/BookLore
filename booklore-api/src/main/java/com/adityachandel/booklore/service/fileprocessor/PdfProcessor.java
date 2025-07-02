@@ -64,6 +64,10 @@ public class PdfProcessor implements FileProcessor {
             fileProcessingUtils.setBookCoverPath(bookEntity.getId(), bookEntity.getMetadata());
         }
         setMetadata(bookEntity);
+
+        String hash = FileUtils.computeFileHash(bookEntity);
+        bookEntity.setCurrentHash(hash);
+
         Float score = metadataMatchService.calculateMatchScore(bookEntity);
         bookEntity.setMetadataMatchScore(score);
         bookCreatorService.saveConnections(bookEntity);

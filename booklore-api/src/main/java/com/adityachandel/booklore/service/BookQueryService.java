@@ -51,7 +51,7 @@ public class BookQueryService {
     public List<BookEntity> getAllFullBookEntities() {
         return bookRepository.findAllFullBooks();
     }
-    
+
     public List<BookEntity> getBooksContainingMetadata(String text) {
         return bookRepository.findBooksContainingMetadata(text);
     }
