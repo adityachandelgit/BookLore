@@ -65,6 +65,12 @@ public class BookEntity {
     @Column(name = "current_hash", length = 128)
     private String currentHash;
 
+    @Column(name = "deleted")
+    private Boolean deleted = Boolean.FALSE;
+
+    @Column(name = "deleted_on")
+    private Instant deletedOn;
+
     @ManyToMany
     @JoinTable(
             name = "book_shelf_mapping",

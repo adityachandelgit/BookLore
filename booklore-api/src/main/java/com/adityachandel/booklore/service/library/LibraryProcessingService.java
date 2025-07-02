@@ -526,7 +526,7 @@ public class LibraryProcessingService {
     }
 
     @Transactional
-    protected void processLibraryFiles(List<LibraryFile> libraryFiles) {
+    public void processLibraryFiles(List<LibraryFile> libraryFiles) {
         for (LibraryFile libraryFile : libraryFiles) {
             log.info("Processing file: {}", libraryFile.getFileName());
             Book book = processLibraryFile(libraryFile);

@@ -1,11 +1,10 @@
 package com.adityachandel.booklore.service.monitoring;
 
 import com.adityachandel.booklore.model.dto.Library;
-import com.adityachandel.booklore.service.library.LibraryProcessingService;
+import com.adityachandel.booklore.service.LibraryFileEventProcessor;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.stereotype.Service;
@@ -23,7 +22,7 @@ import java.util.stream.Stream;
 @Service
 public class MonitoringService {
 
-    private final LibraryProcessingService libraryProcessingService;
+    private final LibraryFileEventProcessor libraryFileEventProcessor;
     private final WatchService watchService;
     private final MonitoringTask monitoringTask;
 
@@ -33,8 +32,8 @@ public class MonitoringService {
     private final BlockingQueue<FileChangeEvent> eventQueue = new LinkedBlockingQueue<>();
     private final ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();
 
-    public MonitoringService(@Lazy LibraryProcessingService libraryProcessingService, WatchService watchService, MonitoringTask monitoringTask) {
-        this.libraryProcessingService = libraryProcessingService;
+    public MonitoringService(LibraryFileEventProcessor libraryFileEventProcessor, WatchService watchService, MonitoringTask monitoringTask) {
+        this.libraryFileEventProcessor = libraryFileEventProcessor;
         this.watchService = watchService;
         this.monitoringTask = monitoringTask;
     }
@@ -103,7 +102,6 @@ public class MonitoringService {
         Path fullPath = event.getFilePath();
         WatchEvent.Kind<?> kind = event.getEventKind();
 
-        // ⏩ Only allow CREATE and DELETE events
         if (kind != StandardWatchEventKinds.ENTRY_CREATE && kind != StandardWatchEventKinds.ENTRY_DELETE) {
             return;
         }
@@ -169,7 +167,7 @@ public class MonitoringService {
 
         if (libraryId != null) {
             try {
-                libraryProcessingService.processFile(event.getEventKind(), libraryId, watchedFolder.toString(), filePath.toString());
+                libraryFileEventProcessor.processFile(event.getEventKind(), libraryId, watchedFolder.toString(), filePath.toString());
             } catch (InvalidDataAccessApiUsageException e) {
                 log.debug("⚠️ InvalidDataAccessApiUsageException for libraryId={}", libraryId);
             }

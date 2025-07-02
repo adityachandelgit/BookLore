@@ -23,6 +23,8 @@ public interface BookRepository extends JpaRepository<BookEntity, Long>, JpaSpec
 
     Optional<BookEntity> findBookByFileNameAndLibraryId(String fileName, long libraryId);
 
+    Optional<BookEntity> findByLibraryPath_IdAndFileSubPathAndFileName(Long libraryPathId, String fileSubPath, String fileName);
+
     @EntityGraph(attributePaths = {"metadata", "shelves"})
     @Query("SELECT DISTINCT b FROM BookEntity b JOIN b.shelves s WHERE s.id = :shelfId")
     List<BookEntity> findAllWithMetadataByShelfId(@Param("shelfId") Long shelfId);
@@ -46,6 +48,8 @@ public interface BookRepository extends JpaRepository<BookEntity, Long>, JpaSpec
     @EntityGraph(attributePaths = {"metadata", "shelves"})
     @Query("SELECT b FROM BookEntity b WHERE b.library.id = :libraryId")
     List<BookEntity> findAllWithMetadataByLibraryId(@Param("libraryId") Long libraryId);
+
+    List<BookEntity> findAllByLibraryPathIdAndFileSubPathStartingWith(Long libraryPathId, String fileSubPathPrefix);
 
     @Query("""
             SELECT DISTINCT b FROM BookEntity b

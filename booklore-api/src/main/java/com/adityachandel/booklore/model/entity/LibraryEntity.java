@@ -25,7 +25,7 @@ public class LibraryEntity {
     @Convert(converter = SortConverter.class)
     private Sort sort;
 
-    @OneToMany(mappedBy = "library", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "library", cascade = CascadeType.MERGE, orphanRemoval = true)
     private List<BookEntity> bookEntities;
 
     @OneToMany(mappedBy = "library", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
