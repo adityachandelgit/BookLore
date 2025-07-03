@@ -1,11 +1,14 @@
 package com.adityachandel.booklore;
 
+import com.adityachandel.booklore.mapper.BookMapper;
 import com.adityachandel.booklore.model.dto.request.FileMoveRequest;
 import com.adityachandel.booklore.model.entity.AuthorEntity;
 import com.adityachandel.booklore.model.entity.BookEntity;
 import com.adityachandel.booklore.model.entity.BookMetadataEntity;
 import com.adityachandel.booklore.model.entity.LibraryPathEntity;
+import com.adityachandel.booklore.repository.BookRepository;
 import com.adityachandel.booklore.service.BookQueryService;
+import com.adityachandel.booklore.service.NotificationService;
 import com.adityachandel.booklore.service.file.FileOperationsService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +34,15 @@ class FileOperationsServiceMoveFilesTest {
 
     @Mock
     private BookQueryService bookQueryService;
+
+    @Mock
+    private BookRepository bookRepository;
+
+    @Mock
+    private BookMapper bookMapper;
+
+    @Mock
+    private NotificationService notificationService;
 
     @InjectMocks
     private FileOperationsService fileOperationsService;
@@ -77,11 +89,18 @@ class FileOperationsServiceMoveFilesTest {
         request.setBookIds(Set.of(1L));
         request.setPattern("NewFolder/{title}");
 
+        Path oldFilePath = book.getFullFilePath();
+
         fileOperationsService.moveFiles(request);
 
         Path expectedNewPath = tempLibraryRoot.resolve("NewFolder").resolve("Test Book.epub");
-        assertThat(Files.exists(expectedNewPath)).isTrue();
-        assertThat(Files.exists(book.getFullFilePath())).isFalse();
+        assertThat(Files.exists(expectedNewPath))
+                .withFailMessage("Expected the file to be moved to %s", expectedNewPath)
+                .isTrue();
+
+        assertThat(Files.exists(oldFilePath))
+                .withFailMessage("Original file path should no longer exist: %s", oldFilePath)
+                .isFalse();
 
         Files.deleteIfExists(expectedNewPath);
         Files.deleteIfExists(expectedNewPath.getParent());
@@ -114,7 +133,9 @@ class FileOperationsServiceMoveFilesTest {
         fileOperationsService.moveFiles(request);
 
         Path expectedNewPath = tempLibraryRoot.resolve("Moved").resolve("NoFile.epub");
-        assertThat(Files.exists(expectedNewPath)).isFalse();
+        assertThat(Files.exists(expectedNewPath))
+                .withFailMessage("No file should be created for nonexistent source")
+                .isFalse();
     }
 
     @Test
@@ -144,8 +165,12 @@ class FileOperationsServiceMoveFilesTest {
         fileOperationsService.moveFiles(request);
 
         Path expectedNewPath = tempLibraryRoot.resolve("Moved").resolve("MissingLibrary.epub");
-        assertThat(Files.exists(expectedNewPath)).isFalse();
-        assertThat(Files.exists(fakeOldFile)).isTrue();
+        assertThat(Files.exists(expectedNewPath))
+                .withFailMessage("File should not be moved if library path is missing")
+                .isFalse();
+        assertThat(Files.exists(fakeOldFile))
+                .withFailMessage("Original file should remain when library path is missing")
+                .isTrue();
 
         Files.deleteIfExists(fakeOldFile);
     }
@@ -163,11 +188,17 @@ class FileOperationsServiceMoveFilesTest {
         request.setBookIds(Set.of(4L));
         request.setPattern("");
 
+        Path oldFilePath = book.getFullFilePath();
+
         fileOperationsService.moveFiles(request);
 
         Path expectedNewPath = tempLibraryRoot.resolve(".epub");
-        assertThat(Files.exists(expectedNewPath)).isTrue();
-        assertThat(Files.exists(book.getFullFilePath())).isFalse();
+        assertThat(Files.exists(expectedNewPath))
+                .withFailMessage("File should be moved to path with extension only when pattern is empty")
+                .isTrue();
+        assertThat(Files.exists(oldFilePath))
+                .withFailMessage("Original file path should no longer exist")
+                .isFalse();
 
         Files.deleteIfExists(expectedNewPath);
     }
@@ -186,11 +217,18 @@ class FileOperationsServiceMoveFilesTest {
         request.setBookIds(Set.of(5L));
         request.setPattern("{title}");
 
+        Path oldFilePath = book.getFullFilePath();
+
         fileOperationsService.moveFiles(request);
 
         Path expectedNewPath = tempLibraryRoot.resolve("BadTitleTest.epub");
-        assertThat(Files.exists(expectedNewPath)).isTrue();
-        assertThat(Files.exists(book.getFullFilePath())).isFalse();
+        assertThat(Files.exists(expectedNewPath))
+                .withFailMessage("Illegal characters should be removed from generated path")
+                .isTrue();
+
+        assertThat(Files.exists(oldFilePath))
+                .withFailMessage("Original file path should no longer exist")
+                .isFalse();
 
         Files.deleteIfExists(expectedNewPath);
     }
@@ -209,15 +247,24 @@ class FileOperationsServiceMoveFilesTest {
         request.setPattern("NewFolder/{title}");
 
         Path oldDir = tempLibraryRoot.resolve(fileSubPath).normalize();
-        assertThat(Files.exists(oldDir)).isTrue();
+        assertThat(Files.exists(oldDir))
+                .withFailMessage("Precondition failed: old directory must exist before move")
+                .isTrue();
 
         fileOperationsService.moveFiles(request);
 
         Path expectedNewPath = tempLibraryRoot.resolve("NewFolder").resolve("Test Book.epub");
-        assertThat(Files.exists(expectedNewPath)).isTrue();
-        assertThat(Files.exists(book.getFullFilePath())).isFalse();
+        assertThat(Files.exists(expectedNewPath))
+                .withFailMessage("Expected file to be moved to new location")
+                .isTrue();
 
-        assertThat(Files.exists(oldDir)).isFalse();
+        assertThat(Files.exists(oldDir))
+                .withFailMessage("Expected old empty directory to be deleted after move")
+                .isFalse();
+
+        assertThat(Files.exists(oldDir.getParent()))
+                .withFailMessage("Expected parent directory of old directory to be deleted if empty")
+                .isFalse();
 
         Files.deleteIfExists(expectedNewPath);
         Files.deleteIfExists(expectedNewPath.getParent());
@@ -233,7 +280,6 @@ class FileOperationsServiceMoveFilesTest {
         Path oldDir = tempLibraryRoot.resolve(fileSubPath).normalize();
         Files.createDirectories(oldDir);
 
-        // Create another file in old directory to prevent deletion
         Path otherFile = oldDir.resolve("otherfile.txt");
         Files.createFile(otherFile);
 
@@ -243,14 +289,25 @@ class FileOperationsServiceMoveFilesTest {
         request.setBookIds(Set.of(7L));
         request.setPattern("NewFolder/{title}");
 
+        Path oldFilePath = book.getFullFilePath();
+
         fileOperationsService.moveFiles(request);
 
         Path expectedNewPath = tempLibraryRoot.resolve("NewFolder").resolve("Test Book.epub");
-        assertThat(Files.exists(expectedNewPath)).isTrue();
-        assertThat(Files.exists(book.getFullFilePath())).isFalse();
 
-        assertThat(Files.exists(oldDir)).isTrue();
-        assertThat(Files.exists(otherFile)).isTrue();
+        assertThat(Files.exists(expectedNewPath))
+                .withFailMessage("Expected file to be moved to new location")
+                .isTrue();
+        assertThat(Files.exists(oldFilePath))
+                .withFailMessage("Original file path should no longer exist")
+                .isFalse();
+
+        assertThat(Files.exists(oldDir))
+                .withFailMessage("Old directory should remain if it contains other files")
+                .isTrue();
+        assertThat(Files.exists(otherFile))
+                .withFailMessage("Other files in old directory should remain intact")
+                .isTrue();
 
         Files.deleteIfExists(otherFile);
         Files.deleteIfExists(expectedNewPath);
@@ -260,7 +317,10 @@ class FileOperationsServiceMoveFilesTest {
     @Test
     void testMoveFiles_handlesMultipleBooks() throws IOException {
         BookEntity book1 = createBookWithFile(tempLibraryRoot, "folder1", "book1.epub");
+        book1.getMetadata().setTitle("Book One");
+
         BookEntity book2 = createBookWithFile(tempLibraryRoot, "folder2", "book2.epub");
+        book2.getMetadata().setTitle("Book Two");
 
         when(bookQueryService.findAllWithMetadataByIds(Set.of(8L, 9L))).thenReturn(List.of(book1, book2));
 
@@ -268,17 +328,30 @@ class FileOperationsServiceMoveFilesTest {
         request.setBookIds(Set.of(8L, 9L));
         request.setPattern("Moved/{title}");
 
+        Path oldPath1 = book1.getFullFilePath();
+        Path oldPath2 = book2.getFullFilePath();
+
         fileOperationsService.moveFiles(request);
 
-        Path expectedPath1 = tempLibraryRoot.resolve("Moved").resolve("Test Book.epub");
-        Path expectedPath2 = tempLibraryRoot.resolve("Moved").resolve("Test Book.epub");
+        Path expectedPath1 = tempLibraryRoot.resolve("Moved").resolve("Book One.epub");
+        Path expectedPath2 = tempLibraryRoot.resolve("Moved").resolve("Book Two.epub");
 
-        assertThat(Files.exists(expectedPath1)).isTrue();
-        assertThat(Files.exists(expectedPath2)).isTrue();
+        assertThat(Files.exists(expectedPath1))
+                .withFailMessage("Expected first book to be moved to new location")
+                .isTrue();
+        assertThat(Files.exists(expectedPath2))
+                .withFailMessage("Expected second book to be moved to new location")
+                .isTrue();
 
-        assertThat(Files.exists(book1.getFullFilePath())).isFalse();
-        assertThat(Files.exists(book2.getFullFilePath())).isFalse();
+        // Assert original files no longer exist using saved paths
+        assertThat(Files.exists(oldPath1))
+                .withFailMessage("Original path for first book should no longer exist")
+                .isFalse();
+        assertThat(Files.exists(oldPath2))
+                .withFailMessage("Original path for second book should no longer exist")
+                .isFalse();
 
+        // Clean up
         Files.deleteIfExists(expectedPath1);
         Files.deleteIfExists(expectedPath2);
         Files.deleteIfExists(expectedPath1.getParent());
@@ -311,7 +384,9 @@ class FileOperationsServiceMoveFilesTest {
         fileOperationsService.moveFiles(request);
 
         Path expectedNewPath = tempLibraryRoot.resolve("Moved").resolve("NullFileName");
-        assertThat(Files.exists(expectedNewPath)).isFalse();
+        assertThat(Files.exists(expectedNewPath))
+                .withFailMessage("File should not be moved if filename is null")
+                .isFalse();
     }
 
     @Test
@@ -341,7 +416,9 @@ class FileOperationsServiceMoveFilesTest {
         fileOperationsService.moveFiles(request);
 
         Path expectedNewPath = tempLibraryRoot.resolve("Moved").resolve("EmptyFileName");
-        assertThat(Files.exists(expectedNewPath)).isFalse();
+        assertThat(Files.exists(expectedNewPath))
+                .withFailMessage("File should not be moved if filename is empty")
+                .isFalse();
     }
 
     @Test
@@ -374,7 +451,9 @@ class FileOperationsServiceMoveFilesTest {
         fileOperationsService.moveFiles(request);
 
         Path expectedNewPath = tempLibraryRoot.resolve("Moved").resolve("NullSubPath.epub");
-        assertThat(Files.exists(expectedNewPath)).isFalse();
+        assertThat(Files.exists(expectedNewPath))
+                .withFailMessage("File should not be moved if fileSubPath is null")
+                .isFalse();
 
         Files.deleteIfExists(oldFile);
     }
@@ -406,7 +485,9 @@ class FileOperationsServiceMoveFilesTest {
         fileOperationsService.moveFiles(request);
 
         Path expectedNewPath = tempLibraryRoot.resolve("Moved").resolve(".epub");
-        assertThat(Files.exists(expectedNewPath)).isFalse();
+        assertThat(Files.exists(expectedNewPath))
+                .withFailMessage("File should not be moved if metadata is null")
+                .isFalse();
 
         Files.deleteIfExists(oldFile);
     }
@@ -425,7 +506,9 @@ class FileOperationsServiceMoveFilesTest {
         fileOperationsService.moveFiles(request);
 
         Path expectedNewPath = tempLibraryRoot.resolve("Moved").resolve("UnknownPlaceholder").resolve("{foo}.epub");
-        assertThat(Files.exists(expectedNewPath)).isTrue();
+        assertThat(Files.exists(expectedNewPath))
+                .withFailMessage("Unknown placeholders should remain in the generated path")
+                .isTrue();
 
         Files.deleteIfExists(expectedNewPath);
         Files.deleteIfExists(expectedNewPath.getParent());

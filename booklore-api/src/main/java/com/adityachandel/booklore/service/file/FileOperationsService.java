@@ -43,39 +43,32 @@ public class FileOperationsService {
         log.info("Starting file move for {} books using pattern: '{}'", books.size(), pattern);
 
         for (BookEntity book : books) {
-            if (book.getMetadata() == null) {
+            if (book.getMetadata() == null) continue;
+
+            if (book.getLibraryPath() == null || book.getLibraryPath().getPath() == null
+                    || book.getFileSubPath() == null || book.getFileName() == null) {
+                log.error("Missing required path components for book id {}. Skipping.", book.getId());
                 continue;
             }
-            if (book.getLibraryPath() == null || book.getLibraryPath().getPath() == null || book.getFileSubPath() == null || book.getFileName() == null) {
-                log.error("❌ Missing library path, file subpath, or file name for book id {}. Skipping.", book.getId());
-                continue;
-            }
+
             Path oldFilePath = book.getFullFilePath();
             if (!Files.exists(oldFilePath)) {
-                log.warn("❗ File does not exist for book id {}: {}", book.getId(), oldFilePath);
+                log.warn("File does not exist for book id {}: {}", book.getId(), oldFilePath);
                 continue;
             }
 
-            log.info("📚 Processing book id {}: '{}'", book.getId(), book.getMetadata().getTitle());
+            log.info("Processing book id {}: '{}'", book.getId(), book.getMetadata().getTitle());
 
             String newRelativePathStr = generatePathFromPattern(book, pattern);
-            // Ensure relative path doesn't start with slash or backslash
             if (newRelativePathStr.startsWith("/") || newRelativePathStr.startsWith("\\")) {
                 newRelativePathStr = newRelativePathStr.substring(1);
             }
-            log.info("📁 Generated new relative path: {}", newRelativePathStr);
 
             Path libraryRoot = Paths.get(book.getLibraryPath().getPath()).toAbsolutePath().normalize();
             Path newFilePath = libraryRoot.resolve(newRelativePathStr).normalize();
 
-            log.info("➡️ Library file path: {}", libraryRoot);
-            log.info("➡️ Resolved new absolute file path: {}", newFilePath);
-            log.info("📂 Creating directories if not present: {}", newFilePath.getParent());
-            System.out.println();
-
-            // Skip move if no path change
             if (oldFilePath.equals(newFilePath)) {
-                log.info("ℹ️ Old and new file paths are the same for book id {}: {}. Skipping move.", book.getId(), oldFilePath);
+                log.info("Source and destination paths are identical for book id {}. Skipping.", book.getId());
                 continue;
             }
 
@@ -84,40 +77,28 @@ public class FileOperationsService {
                     Files.createDirectories(newFilePath.getParent());
                 }
 
-                log.info("🚚 Moving file from {} to {}", oldFilePath, newFilePath);
+                log.info("Moving file from {} to {}", oldFilePath, newFilePath);
                 Files.move(oldFilePath, newFilePath, StandardCopyOption.REPLACE_EXISTING);
 
-                log.info("✅ File moved successfully for book id {}", book.getId());
-
                 String newFileName = newFilePath.getFileName().toString();
-
-                // Compute new file sub path (relative to library root)
                 Path newRelativeSubPath = libraryRoot.relativize(newFilePath.getParent());
-                String newFileSubPath = newRelativeSubPath.toString();
-
-                // Normalize slashes (optional)
-                newFileSubPath = newFileSubPath.replace('\\', '/');
+                String newFileSubPath = newRelativeSubPath.toString().replace('\\', '/');
 
                 book.setFileSubPath(newFileSubPath);
                 book.setFileName(newFileName);
-
-                // Save the updated book entity
                 bookRepository.save(book);
 
-                // Map to DTO and send update notification to frontend
                 Book updatedBookDto = bookMapper.toBook(book);
                 notificationService.sendMessage(Topic.BOOK_METADATA_UPDATE, updatedBookDto);
 
-                log.info("📦 Updated BookEntity for book id {} with new subpath '{}' and filename '{}'", book.getId(), newFileSubPath, newFileName);
-
-                log.info("🧹 Cleaning up old directories for {}", oldFilePath.getParent());
+                log.info("Updated book id {} with new path", book.getId());
                 deleteEmptyParentDirsUpToLibraryFolders(oldFilePath.getParent(), Set.of(libraryRoot));
             } catch (IOException e) {
-                log.error("❌ Failed to move file for book id {}: {}", book.getId(), e.getMessage(), e);
+                log.error("Failed to move file for book id {}: {}", book.getId(), e.getMessage(), e);
             }
         }
 
-        log.info("🎉 Completed file move operation for {} books.", books.size());
+        log.info("Completed file move for {} books.", books.size());
     }
 
     public String generatePathFromPattern(BookEntity book, String pattern) {
