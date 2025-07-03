@@ -1,7 +1,7 @@
 package com.adityachandel.booklore.service.monitoring;
 
 import com.adityachandel.booklore.model.dto.Library;
-import com.adityachandel.booklore.service.LibraryFileEventProcessor;
+import com.adityachandel.booklore.service.watcher.LibraryFileEventProcessor;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;

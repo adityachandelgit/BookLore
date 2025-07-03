@@ -1,4 +1,4 @@
-package com.adityachandel.booklore.mapperv2;
+package com.adityachandel.booklore.mapper.v2;
 
 import com.adityachandel.booklore.model.dto.Book;
 import com.adityachandel.booklore.model.dto.BookMetadata;

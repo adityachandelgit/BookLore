@@ -1,4 +1,4 @@
-package com.adityachandel.booklore.service;
+package com.adityachandel.booklore.service.watcher;
 
 import com.adityachandel.booklore.exception.ApiError;
 import com.adityachandel.booklore.model.dto.settings.LibraryFile;
@@ -8,6 +8,7 @@ import com.adityachandel.booklore.model.entity.LibraryPathEntity;
 import com.adityachandel.booklore.model.enums.BookFileType;
 import com.adityachandel.booklore.model.websocket.Topic;
 import com.adityachandel.booklore.repository.LibraryRepository;
+import com.adityachandel.booklore.service.NotificationService;
 import com.adityachandel.booklore.service.library.LibraryProcessingService;
 import com.adityachandel.booklore.util.FileUtils;
 import jakarta.transaction.Transactional;

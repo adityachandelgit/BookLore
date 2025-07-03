@@ -1,6 +1,6 @@
 package com.adityachandel.booklore.service;
 
-import com.adityachandel.booklore.mapperv2.BookMapperV2;
+import com.adityachandel.booklore.mapper.v2.BookMapperV2;
 import com.adityachandel.booklore.model.dto.Book;
 import com.adityachandel.booklore.model.entity.BookEntity;
 import com.adityachandel.booklore.repository.BookRepository;
