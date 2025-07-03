@@ -174,28 +174,24 @@ public class LibraryProcessingService {
     }
 
     private List<LibraryFile> findLibraryFiles(LibraryPathEntity pathEntity, LibraryEntity libraryEntity) throws IOException {
-        List<LibraryFile> libraryFiles = new ArrayList<>();
         Path libraryPath = Path.of(pathEntity.getPath());
         try (Stream<Path> stream = Files.walk(libraryPath)) {
-            stream.filter(Files::isRegularFile)
-                    .filter(file -> {
-                        String name = file.getFileName().toString().toLowerCase();
-                        return !name.startsWith(".") && BookFileExtension.fromFileName(name).isPresent();
+            return stream.filter(Files::isRegularFile)
+                    .map(fullPath -> {
+                        String fileName = fullPath.getFileName().toString();
+                        return BookFileExtension.fromFileName(fileName)
+                                .map(ext -> LibraryFile.builder()
+                                        .libraryEntity(libraryEntity)
+                                        .libraryPathEntity(pathEntity)
+                                        .fileSubPath(FileUtils.getRelativeSubPath(pathEntity.getPath(), fullPath))
+                                        .fileName(fileName)
+                                        .bookFileType(ext.getType())
+                                        .build())
+                                .orElse(null);
                     })
-                    .forEach(fullPath -> {
-                        String name = fullPath.getFileName().toString();
-                        BookFileExtension.fromFileName(name.toLowerCase()).ifPresent(ext -> {
-                            String relPath = FileUtils.getRelativeSubPath(pathEntity.getPath(), fullPath);
-                            libraryFiles.add(LibraryFile.builder()
-                                    .libraryEntity(libraryEntity)
-                                    .libraryPathEntity(pathEntity)
-                                    .fileSubPath(relPath)
-                                    .fileName(name)
-                                    .bookFileType(ext.getType())
-                                    .build());
-                        });
-                    });
+                    .filter(Objects::nonNull)
+                    .filter(file -> !file.getFileName().startsWith("."))
+                    .toList();
         }
-        return libraryFiles;
     }
 }

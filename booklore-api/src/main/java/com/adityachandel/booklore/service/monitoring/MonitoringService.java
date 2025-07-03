@@ -1,6 +1,7 @@
 package com.adityachandel.booklore.service.monitoring;
 
 import com.adityachandel.booklore.model.dto.Library;
+import com.adityachandel.booklore.model.enums.BookFileExtension;
 import com.adityachandel.booklore.service.watcher.LibraryFileEventProcessor;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -202,12 +203,7 @@ public class MonitoringService {
     }
 
 
-    private boolean isRelevantBookFile(Path path) {
-        String name = path.getFileName().toString().toLowerCase();
-        return name.endsWith(".pdf")
-                || name.endsWith(".epub")
-                || name.endsWith(".cbz")
-                || name.endsWith(".cbr")
-                || name.endsWith(".cb7");
+    public boolean isRelevantBookFile(Path path) {
+        return BookFileExtension.fromFileName(path.getFileName().toString()).isPresent();
     }
 }

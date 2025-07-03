@@ -5,6 +5,7 @@ import com.adityachandel.booklore.model.dto.settings.LibraryFile;
 import com.adityachandel.booklore.model.entity.BookEntity;
 import com.adityachandel.booklore.model.entity.LibraryEntity;
 import com.adityachandel.booklore.model.entity.LibraryPathEntity;
+import com.adityachandel.booklore.model.enums.BookFileExtension;
 import com.adityachandel.booklore.model.enums.BookFileType;
 import com.adityachandel.booklore.model.websocket.Topic;
 import com.adityachandel.booklore.repository.LibraryRepository;
@@ -56,23 +57,14 @@ public class BookFileTransactionalHandler {
                 .libraryPathEntity(libraryPathEntity)
                 .fileSubPath(FileUtils.getRelativeSubPath(libraryPathEntity.getPath(), path))
                 .fileName(fileName)
-                .bookFileType(getBookFileType(fileName))
+                .bookFileType(BookFileExtension.fromFileName(fileName)
+                        .map(BookFileExtension::getType)
+                        .orElseThrow(() -> new IllegalArgumentException("Unsupported book file type: " + fileName)))
                 .build();
 
         libraryProcessingService.processLibraryFiles(List.of(libraryFile));
 
         notificationService.sendMessage(Topic.LOG, createLogNotification("Finished processing file: " + filePath));
         log.info("[CREATE] Completed processing for file '{}'", filePath);
-    }
-
-    protected BookFileType getBookFileType(String fileName) {
-        String lowerCaseName = fileName.toLowerCase();
-        if (lowerCaseName.endsWith(".pdf")) {
-            return BookFileType.PDF;
-        } else if (lowerCaseName.endsWith(".cbz") || lowerCaseName.endsWith(".cbr") || lowerCaseName.endsWith(".cb7")) {
-            return BookFileType.CBX;
-        } else {
-            return BookFileType.EPUB;
-        }
     }
 }

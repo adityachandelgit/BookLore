@@ -4,6 +4,7 @@ import com.adityachandel.booklore.exception.ApiError;
 import com.adityachandel.booklore.model.entity.BookEntity;
 import com.adityachandel.booklore.model.entity.LibraryEntity;
 import com.adityachandel.booklore.model.entity.LibraryPathEntity;
+import com.adityachandel.booklore.model.enums.BookFileExtension;
 import com.adityachandel.booklore.model.websocket.Topic;
 import com.adityachandel.booklore.repository.LibraryRepository;
 import com.adityachandel.booklore.service.NotificationService;
@@ -18,10 +19,7 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.*;
 
 @Slf4j
 @Service
@@ -39,14 +37,12 @@ public class LibraryFileEventProcessor {
     public void init() {
         Thread.ofVirtual().start(() -> {
             log.info("LibraryFileEventProcessor virtual thread started.");
-            while (true) {
+            while (!Thread.currentThread().isInterrupted()) {
                 try {
-                    FileEvent event = eventQueue.take();
-                    handleEvent(event);
+                    handleEvent(eventQueue.take());
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     log.warn("LibraryFileEventProcessor virtual thread interrupted.");
-                    break;
                 } catch (Exception e) {
                     log.error("Error while processing file event", e);
                 }
@@ -54,145 +50,116 @@ public class LibraryFileEventProcessor {
         });
     }
 
+    public void processFile(WatchEvent.Kind<?> eventKind, long libraryId, String libraryPath, String filePath) {
+        eventQueue.offer(new FileEvent(eventKind, libraryId, libraryPath, filePath));
+    }
+
     private void handleEvent(FileEvent event) {
-        log.info("[PROCESS] Handling '{}' event for '{}'", event.eventKind().name(), event.filePath());
-
-        LibraryEntity libraryEntity = libraryRepository.findById(event.libraryId()).orElseThrow(() -> ApiError.LIBRARY_NOT_FOUND.createException(event.libraryId()));
-
         Path path = Paths.get(event.filePath());
         String fileName = path.getFileName().toString();
+        log.info("[PROCESS] '{}' event for '{}'", event.eventKind().name(), fileName);
 
-        boolean underLibrary = libraryEntity.getLibraryPaths().stream().anyMatch(lp -> path.toString().startsWith(lp.getPath()));
+        LibraryEntity library = libraryRepository.findById(event.libraryId()).orElseThrow(() -> ApiError.LIBRARY_NOT_FOUND.createException(event.libraryId()));
 
-        boolean hasBookExtension = isRelevantBookFile(path);
-        boolean isFolderCandidate = !fileName.contains(".");
-
-        if (!underLibrary) {
-            log.debug("[PROCESS] Ignoring path outside library: '{}'", path);
+        if (library.getLibraryPaths().stream().noneMatch(lp -> path.toString().startsWith(lp.getPath()))) {
+            log.warn("[SKIP] Path outside of library: '{}'", path);
             return;
         }
 
-        // === Folder Paths ===
-        if (isFolderCandidate) {
-            if (event.eventKind() == StandardWatchEventKinds.ENTRY_CREATE) {
-                log.info("[FOLDER_CREATE] New folder detected: '{}'", path);
-                handleFolderCreate(libraryEntity, path);
-            } else if (event.eventKind() == StandardWatchEventKinds.ENTRY_DELETE) {
-                log.info("[FOLDER_DELETE] Folder deleted: '{}'", path);
-                handleFolderDelete(libraryEntity, path);
-            } else {
-                log.debug("[FOLDER_IGNORED] Ignored folder event '{}' for '{}'", event.eventKind().name(), path);
+        if (isFolder(path)) {
+            switch (event.eventKind().name()) {
+                case "ENTRY_CREATE" -> handleFolderCreate(library, path);
+                case "ENTRY_DELETE" -> handleFolderDelete(library, path);
+                default -> log.warn("[SKIP] Folder event '{}' ignored for '{}'", event.eventKind().name(), fileName);
             }
             return;
         }
 
-        // === File Paths ===
-        if (!hasBookExtension) {
-            log.debug("[PROCESS] Ignored non-book file: '{}'", path);
+        if (!isBookFile(fileName)) {
+            log.debug("[SKIP] Ignored non-book file '{}'", fileName);
             return;
         }
 
-        if (event.eventKind() == StandardWatchEventKinds.ENTRY_CREATE) {
-            handleFileCreate(libraryEntity, path);
-        } else if (event.eventKind() == StandardWatchEventKinds.ENTRY_DELETE) {
-            log.info("[FILE_DELETE] Book file deleted: '{}'", path);
-            handleFileDelete(libraryEntity, path);
-        } else {
-            log.debug("[FILE_IGNORED] Ignored file event '{}' for '{}'", event.eventKind().name(), path);
+        switch (event.eventKind().name()) {
+            case "ENTRY_CREATE" -> handleFileCreate(library, path);
+            case "ENTRY_DELETE" -> handleFileDelete(library, path);
+            default -> log.debug("[SKIP] File event '{}' ignored for '{}'", event.eventKind().name(), fileName);
         }
     }
 
-    private void handleFileCreate(LibraryEntity libraryEntity, Path path) {
-        log.info("[FILE_CREATE] Handling file create for '{}'", path);
-
-        String currentHash = FileUtils.computeFileHash(path);
-        if (currentHash == null) {
-            log.warn("[FILE_CREATE] Could not compute hash for '{}'", path);
+    private void handleFileCreate(LibraryEntity library, Path path) {
+        log.info("[FILE_CREATE] '{}'", path);
+        String hash = FileUtils.computeFileHash(path);
+        if (hash == null) {
+            log.warn("[SKIP] Unable to compute hash for '{}'", path);
             return;
         }
-
-        bookFileTransactionalHandler.handleNewBookFile(libraryEntity.getId(), path, currentHash);
+        bookFileTransactionalHandler.handleNewBookFile(library.getId(), path, hash);
     }
 
-    private void handleFileDelete(LibraryEntity libraryEntity, Path path) {
-        log.info("[FILE_DELETE] Handling file delete for '{}'", path);
-
+    private void handleFileDelete(LibraryEntity library, Path path) {
+        log.info("[FILE_DELETE] '{}'", path);
         try {
-            String matchingLibraryPath = bookFilePersistenceService.findMatchingLibraryPath(libraryEntity, path);
-            LibraryPathEntity libraryPathEntity = bookFilePersistenceService.getLibraryPathEntityForFile(libraryEntity, matchingLibraryPath);
+            String libPath = bookFilePersistenceService.findMatchingLibraryPath(library, path);
+            LibraryPathEntity libPathEntity = bookFilePersistenceService.getLibraryPathEntityForFile(library, libPath);
 
-            Path libraryRoot = Paths.get(libraryPathEntity.getPath()).toAbsolutePath().normalize();
-            Path fullPath = path.toAbsolutePath().normalize();
+            Path relPath = Paths.get(libPathEntity.getPath()).relativize(path.toAbsolutePath().normalize());
+            String fileName = relPath.getFileName().toString();
+            String fileSubPath = Optional.ofNullable(relPath.getParent()).map(Path::toString).orElse("");
 
-            Path relativePath = libraryRoot.relativize(fullPath);
-
-            String fileName = relativePath.getFileName().toString();
-            String fileSubPath = relativePath.getParent() == null ? "" : relativePath.getParent().toString();
-
-            Optional<BookEntity> bookOpt = bookFilePersistenceService.findByLibraryPathSubPathAndFileName(libraryPathEntity.getId(), fileSubPath, fileName);
-
-            if (bookOpt.isPresent()) {
-                BookEntity book = bookOpt.get();
-                book.setDeleted(true);
-                bookFilePersistenceService.save(book);
-                notificationService.sendMessage(Topic.BOOKS_REMOVE, Set.of(book.getId()));
-                log.info("[FILE_DELETE] Marked book as deleted for '{}'", path);
-            } else {
-                log.warn("[FILE_DELETE] No book found for deleted path '{}'", path);
-            }
+            bookFilePersistenceService.findByLibraryPathSubPathAndFileName(libPathEntity.getId(), fileSubPath, fileName)
+                    .ifPresentOrElse(book -> {
+                        book.setDeleted(true);
+                        bookFilePersistenceService.save(book);
+                        notificationService.sendMessage(Topic.BOOKS_REMOVE, Set.of(book.getId()));
+                        log.info("[MARKED_DELETED] Book '{}' marked as deleted", fileName);
+                    }, () -> log.warn("[NOT_FOUND] Book for deleted path '{}' not found", path));
 
         } catch (Exception e) {
-            log.warn("[FILE_DELETE] Failed to locate library path or book for '{}': {}", path, e.getMessage());
+            log.warn("[ERROR] While handling file delete '{}': {}", path, e.getMessage());
         }
     }
 
-    private void handleFolderCreate(LibraryEntity libraryEntity, Path folderPath) {
-        log.info("[FOLDER_CREATE] Handling folder create for '{}'", folderPath);
+    private void handleFolderCreate(LibraryEntity library, Path folderPath) {
+        log.info("[FOLDER_CREATE] '{}'", folderPath);
         try (var stream = Files.walk(folderPath)) {
             stream.filter(Files::isRegularFile)
-                    .filter(this::isRelevantBookFile)
-                    .forEach(path -> {
+                    .filter(p -> isBookFile(p.getFileName().toString()))
+                    .forEach(p -> {
                         try {
-                            String hash = FileUtils.computeFileHash(path);
+                            String hash = FileUtils.computeFileHash(p);
                             if (hash != null) {
-                                bookFileTransactionalHandler.handleNewBookFile(libraryEntity.getId(), path, hash);
+                                bookFileTransactionalHandler.handleNewBookFile(library.getId(), p, hash);
                             }
                         } catch (Exception e) {
-                            log.warn("[FOLDER_CREATE] Error processing file '{}': {}", path, e.getMessage());
+                            log.warn("[ERROR] Processing file '{}': {}", p, e.getMessage());
                         }
                     });
         } catch (IOException e) {
-            log.warn("[FOLDER_CREATE] Failed to walk folder '{}': {}", folderPath, e.getMessage());
+            log.warn("[ERROR] Walking folder '{}': {}", folderPath, e.getMessage());
         }
     }
 
-    private void handleFolderDelete(LibraryEntity libraryEntity, Path folderPath) {
-        log.info("[FOLDER_DELETE] Handling folder delete for '{}'", folderPath);
+    private void handleFolderDelete(LibraryEntity library, Path folderPath) {
+        log.info("[FOLDER_DELETE] '{}'", folderPath);
         try {
-            String matchingLibraryPath = bookFilePersistenceService.findMatchingLibraryPath(libraryEntity, folderPath);
-            LibraryPathEntity libraryPathEntity = bookFilePersistenceService.getLibraryPathEntityForFile(libraryEntity, matchingLibraryPath);
+            String libPath = bookFilePersistenceService.findMatchingLibraryPath(library, folderPath);
+            LibraryPathEntity libPathEntity = bookFilePersistenceService.getLibraryPathEntityForFile(library, libPath);
 
-            String relativePrefix = FileUtils.getRelativeSubPath(libraryPathEntity.getPath(), folderPath);
-
-            int markedCount = bookFilePersistenceService.markAllBooksUnderPathAsDeleted(libraryPathEntity.getId(), relativePrefix);
-            log.info("[FOLDER_DELETE] Marked {} books as deleted under '{}'", markedCount, folderPath);
+            String relativePrefix = FileUtils.getRelativeSubPath(libPathEntity.getPath(), folderPath);
+            int count = bookFilePersistenceService.markAllBooksUnderPathAsDeleted(libPathEntity.getId(), relativePrefix);
+            log.info("[MARKED_DELETED] {} books under '{}'", count, folderPath);
         } catch (Exception e) {
-            log.warn("[FOLDER_DELETE] Failed to mark books as deleted under '{}': {}", folderPath, e.getMessage());
+            log.warn("[ERROR] Folder delete '{}': {}", folderPath, e.getMessage());
         }
     }
 
-    public boolean isRelevantBookFile(Path path) {
-        String name = path.getFileName().toString().toLowerCase();
-        return name.endsWith(".pdf")
-                || name.endsWith(".epub")
-                || name.endsWith(".cbz")
-                || name.endsWith(".cbr")
-                || name.endsWith(".cb7");
+    private boolean isFolder(Path path) {
+        return !path.getFileName().toString().contains(".");
     }
 
-    public void processFile(WatchEvent.Kind<?> eventKind, long libraryId, String libraryPath, String filePath) {
-        FileEvent event = new FileEvent(eventKind, libraryId, libraryPath, filePath);
-        eventQueue.offer(event);
+    private boolean isBookFile(String fileName) {
+        return BookFileExtension.fromFileName(fileName).isPresent();
     }
 
     @PreDestroy
