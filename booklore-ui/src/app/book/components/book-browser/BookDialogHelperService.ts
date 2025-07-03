@@ -7,6 +7,7 @@ import {MetadataRefreshType} from '../../metadata/model/request/metadata-refresh
 import {BulkMetadataUpdateComponent} from '../../metadata/bulk-metadata-update-component/bulk-metadata-update-component';
 import {MultiBookMetadataEditorComponent} from '../../metadata/multi-book-metadata-editor-component/multi-book-metadata-editor-component';
 import {FileMoverComponent} from '../../../file-mover-component/file-mover-component';
+import {count} from 'rxjs';
 
 @Injectable({providedIn: 'root'})
 export class BookDialogHelperService {
@@ -90,8 +91,9 @@ export class BookDialogHelperService {
   }
 
   openFileMoverDialog(selectedBooks: Set<number>) {
+    const count = selectedBooks.size;
     return this.dialogService.open(FileMoverComponent, {
-      header: 'Move Files',
+      header: `Relocate Book Files (${count} book${count !== 1 ? 's' : ''})`,
       showHeader: true,
       modal: true,
       closable: true,

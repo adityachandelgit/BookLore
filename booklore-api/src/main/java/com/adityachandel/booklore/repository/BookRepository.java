@@ -1,10 +1,12 @@
 package com.adityachandel.booklore.repository;
 
 import com.adityachandel.booklore.model.entity.BookEntity;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -75,5 +77,10 @@ public interface BookRepository extends JpaRepository<BookEntity, Long>, JpaSpec
     List<BookEntity> findBooksContainingMetadata(@Param("text") String text);
 
     Optional<BookEntity> findByCurrentHash(String currentHash);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM BookEntity b WHERE b.deletedAt IS NOT NULL AND b.deletedAt < :cutoff")
+    int deleteAllByDeletedAtBefore(Instant cutoff);
 }
 

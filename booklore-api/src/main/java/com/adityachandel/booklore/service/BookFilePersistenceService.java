@@ -81,7 +81,7 @@ public class BookFilePersistenceService {
         List<BookEntity> books = bookRepository.findAllByLibraryPathIdAndFileSubPathStartingWith(libraryPathId, normalizedPrefix);
         books.forEach(book -> {
             book.setDeleted(true);
-            book.setDeletedOn(Instant.now());
+            book.setDeletedAt(Instant.now());
         });
 
         bookRepository.saveAll(books);

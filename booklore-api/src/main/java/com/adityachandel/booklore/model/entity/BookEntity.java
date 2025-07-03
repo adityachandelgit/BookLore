@@ -68,8 +68,8 @@ public class BookEntity {
     @Column(name = "deleted")
     private Boolean deleted = Boolean.FALSE;
 
-    @Column(name = "deleted_on")
-    private Instant deletedOn;
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
 
     @ManyToMany
     @JoinTable(

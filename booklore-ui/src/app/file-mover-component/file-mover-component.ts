@@ -9,6 +9,7 @@ import {DynamicDialogConfig, DynamicDialogRef} from 'primeng/dynamicdialog';
 import {BookService} from '../book/service/book.service';
 import {Book} from '../book/model/book.model';
 import {FileOperationsService, FileMoveRequest} from '../file-operations-service';
+import {MessageService} from 'primeng/api';
 
 @Component({
   selector: 'app-file-mover-component',
@@ -22,14 +23,15 @@ export class FileMoverComponent implements OnInit {
   private ref = inject(DynamicDialogRef);
   private bookService = inject(BookService);
   private fileOperationsService = inject(FileOperationsService);
+  private messageService = inject(MessageService);
 
-  movePattern = '/{authors}/<{series}/><{seriesIndex}. >{title} - {authors} <({year})>';
+  movePattern = '/{authors}/<{series}/><{seriesIndex}. >{title} - {authors}< ({year})>';
   placeholdersVisible = false;
   loading = false;
 
   bookIds: Set<number> = new Set();
   books: Book[] = [];
-  filePreviews: { originalPath: string; newPath: string }[] = [];
+  filePreviews: { originalPath: string; newPath: string; isMoved?: boolean }[] = [];
 
   ngOnInit(): void {
     this.bookIds = this.config.data?.bookIds ?? new Set();
@@ -40,9 +42,9 @@ export class FileMoverComponent implements OnInit {
 
   applyPattern(): void {
     const formatYear = (dateStr: string | undefined, format: string): string => {
-      if (!dateStr) return 'Unknown Year';
+      if (!dateStr) return '';
       const date = new Date(dateStr);
-      if (isNaN(date.getTime())) return 'Unknown Year';
+      if (isNaN(date.getTime())) return '';
 
       const yyyy = date.getFullYear().toString();
       const yy = yyyy.slice(-2);
@@ -50,10 +52,14 @@ export class FileMoverComponent implements OnInit {
       const dd = String(date.getDate()).padStart(2, '0');
 
       switch (format) {
-        case 'yyyy': return yyyy;
-        case 'yy': return yy;
-        case 'yyyy-MM-dd': return `${yyyy}-${mm}-${dd}`;
-        default: return yyyy;
+        case 'yyyy':
+          return yyyy;
+        case 'yy':
+          return yy;
+        case 'yyyy-MM-dd':
+          return `${yyyy}-${mm}-${dd}`;
+        default:
+          return yyyy;
       }
     };
 
@@ -62,10 +68,12 @@ export class FileMoverComponent implements OnInit {
       const values: Record<string, string> = {
         authors: this.sanitize(meta.authors?.join(', ') || 'Unknown Author'),
         title: this.sanitize(meta.title || 'Untitled'),
+
         year: this.sanitize(formatYear(meta.publishedDate, 'yyyy')),
         'year:yyyy': this.sanitize(formatYear(meta.publishedDate, 'yyyy')),
         'year:yy': this.sanitize(formatYear(meta.publishedDate, 'yy')),
         'year:yyyy-MM-dd': this.sanitize(formatYear(meta.publishedDate, 'yyyy-MM-dd')),
+
         series: this.sanitize(meta.seriesName || ''),
         seriesIndex: this.sanitize(meta.seriesTotal != null ? meta.seriesTotal.toString().padStart(2, '0') : ''),
         language: this.sanitize(meta.language || ''),
@@ -76,28 +84,18 @@ export class FileMoverComponent implements OnInit {
       const fileName = book.fileName ?? '';
       const extension = fileName.match(/\.[^.]+$/)?.[0] ?? '';
 
-      console.log(book.filePath)
-
       const originalPath = '/' + `${book.fileSubPath ?? ''}/${fileName}`;
 
-      // Replace optional blocks like <{series}/>
-      let newPath = this.movePattern.replace(/<([^<>]+)>/g, (_, optionalBlock) => {
-        const placeholderRegex = /{(.*?)}/g;
-        let match;
-        let allHaveValues = true;
-
-        while ((match = placeholderRegex.exec(optionalBlock)) !== null) {
-          const key = match[1];
-          if (!values[key]) {
-            allHaveValues = false;
-            break;
-          }
-        }
-
-        return allHaveValues ? optionalBlock : '';
+      let newPath = this.movePattern.replace(/<([^<>]+)>/g, (_, block) => {
+        const placeholders = [...block.matchAll(/{(.*?)}/g)].map(m => m[1]);
+        // Only keep block if all placeholders have non-empty, non-whitespace values
+        const hasAllValues = placeholders.every(key => values[key]?.trim().length ?? 0 > 0);
+        return hasAllValues
+          ? block.replace(/{(.*?)}/g, (_: string, key: string) => values[key])
+          : '';
       });
 
-      // Replace placeholders
+      // Replace placeholders outside optional blocks
       newPath = newPath.replace(/{(.*?)}/g, (_, key) => values[key] ?? '');
 
       return {
@@ -107,11 +105,15 @@ export class FileMoverComponent implements OnInit {
     });
   }
 
+  get movedFileCount(): number {
+    return this.filePreviews.filter(p => p.isMoved).length;
+  }
+
   sanitize(input: string | undefined): string {
     if (!input) return '';
     return input
       .replace(/[\\/:*?"<>|]/g, '')     // Remove illegal Windows chars, incl < and >
-      .replace(/[\x00-\x1F\x7F]/g, '') // Remove control chars
+      .replace(/[\x00-\x1F\x7F]/g, '')  // Remove control chars
       .replace(/\s+/g, ' ')             // Collapse multiple spaces
       .trim();
   }
@@ -127,12 +129,22 @@ export class FileMoverComponent implements OnInit {
     this.fileOperationsService.moveFiles(request).subscribe({
       next: () => {
         this.loading = false;
-        this.ref.close(this.filePreviews);
+        this.filePreviews.forEach(p => (p.isMoved = true));
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Files Moved',
+          detail: `${this.filePreviews.length} file(s) successfully relocated.`,
+          life: 3000
+        });
       },
       error: (err) => {
         this.loading = false;
-        console.error('File move failed:', err);
-        // Optionally: display toast here
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Move Failed',
+          detail: 'An error occurred while moving the files.',
+          life: 5000
+        });
       }
     });
   }

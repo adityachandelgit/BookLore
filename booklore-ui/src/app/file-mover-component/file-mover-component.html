@@ -1,12 +1,32 @@
-<div class="p-fluid p-2 rounded-xl flex flex-col h-[800px]">
+<div class="p-fluid px-4 py-2 rounded-xl flex flex-col h-[800px]">
 
-  <div class="mb-3 px-1 text-sm text-muted">
-    <button
-      type="button"
-      class="p-button p-button-text p-button-sm"
+  <div class="px-4 mx-2 mb-4 py-3 rounded-lg border border-[var(--border-color)] transition-all">
+    <p class="text-[var(--primary-color)] font-semibold mb-1">
+      Customize Your File Organization
+    </p>
+    <p class="text-sm text-gray-300 leading-relaxed">
+      Define a naming pattern to reorganize selected book files on your system. Use dynamic placeholders like
+      <code class="bg-gray-800 px-1 py-0.5 rounded text-[var(--primary-color)] font-mono text-xs">{{ '{title}' }}</code>
+      or
+      <code class="bg-gray-800 px-1 py-0.5 rounded text-[var(--primary-color)] font-mono text-xs">{{ '{authors}' }}</code>
+      to automatically insert metadata. <br>
+      A preview below shows how files will be renamed and moved.
+      Once you're satisfied, click <span class="font-semibold text-green-400">Apply</span> to proceed.
+      <span class="text-yellow-500 font-medium flex items-center gap-2">
+        <i class="pi pi-exclamation-triangle text-yellow-400"></i>
+        Files will be physically moved on your system when you apply changes.
+      </span>
+    </p>
+  </div>
+
+  <div class="mb-2 px-1 text-sm text-muted">
+    <p-button
+      size="small"
+      text
+      severity="info"
       (click)="placeholdersVisible = !placeholdersVisible">
       {{ placeholdersVisible ? 'Hide' : 'Show' }} available placeholders
-    </button>
+    </p-button>
 
     @if (placeholdersVisible) {
       <div class="mx-4 my-2 flex flex-wrap gap-4">
@@ -38,7 +58,7 @@
     }
   </div>
 
-  <div class="flex gap-4 mb-4 w-full">
+  <div class="flex gap-4 mb-4 px-2 w-full">
     <input
       type="text"
       pInputText
@@ -56,16 +76,23 @@
     >
       <ng-template pTemplate="header">
         <tr>
+          <th style="width: 0.5rem; text-align: center;">#</th>
           <th>Current Path</th>
           <th></th>
           <th>New Path</th>
         </tr>
       </ng-template>
-      <ng-template pTemplate="body" let-preview>
+      <ng-template pTemplate="body" let-preview let-i="rowIndex">
         <tr>
+          <td class="text-center">{{ i + 1 }}</td>
           <td class="w-auto"><p class=" text-gray-200">{{ preview.originalPath }}</p></td>
-          <td class="w-auto text-center">→</td>
+          <td class="w-auto text-[var(--primary-color)]">→</td>
           <td class="w-auto"><p class=" text-gray-200">{{ preview.newPath }}</p></td>
+          <td class="w-auto text-center">
+            @if (preview.isMoved) {
+              <i class="pi pi-check-circle text-green-600"></i>
+            }
+          </td>
         </tr>
       </ng-template>
     </p-table>
@@ -73,19 +100,39 @@
 
   <p-divider></p-divider>
 
-  <div class="flex justify-end gap-4 flex-shrink-0">
-    <p-button
-      [label]="loading ? 'Applying...' : 'Apply'"
-      [icon]="loading ? 'pi pi-spin pi-spinner' : 'pi pi-save'"
-      severity="success"
-      (click)="saveChanges()"
-      [disabled]="loading || filePreviews.length === 0"
-    ></p-button>
-    <p-button
-      label="Cancel"
-      icon="pi pi-times"
-      severity="danger"
-      (click)="cancel()"
-    ></p-button>
+  <div class="flex justify-end items-center gap-4 flex-shrink-0 px-4">
+    @if (movedFileCount > 0) {
+      <span class="text-green-500 flex items-center font-semibold drop-shadow-sm select-none">
+        {{ movedFileCount }} file{{ movedFileCount > 1 ? 's' : '' }} successfully moved
+        <i
+          class="pi pi-check-circle ml-2 text-green-500 animate-bounce"
+          style="animation-duration: 1.5s;"
+          aria-label="Success"
+          role="img"
+        ></i>
+      </span>
+    }
+    @if (movedFileCount === 0) {
+      <p-button
+        [label]="loading ? 'Applying...' : 'Apply'"
+        [icon]="loading ? 'pi pi-spin pi-spinner' : 'pi pi-save'"
+        severity="success"
+        (click)="saveChanges()"
+        [disabled]="loading || filePreviews.length === 0"
+      ></p-button>
+      <p-button
+        label="Cancel"
+        icon="pi pi-times"
+        severity="danger"
+        (click)="cancel()"
+      ></p-button>
+    } @else {
+      <p-button
+        label="Close"
+        icon="pi pi-times"
+        severity="secondary"
+        (click)="cancel()"
+      ></p-button>
+    }
   </div>
 </div>

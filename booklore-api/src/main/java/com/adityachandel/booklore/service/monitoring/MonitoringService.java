@@ -48,24 +48,31 @@ public class MonitoringService {
         libraries.stream()
                 .filter(Library::isWatch)
                 .forEach(library -> {
+                    int[] registeredCount = {0};
+
                     library.getPaths().forEach(libraryPath -> {
                         Path rootPath = Paths.get(libraryPath.getPath());
                         if (Files.isDirectory(rootPath)) {
                             try (Stream<Path> pathStream = Files.walk(rootPath)) {
                                 pathStream
                                         .filter(Files::isDirectory)
-                                        .forEach(path -> registerPath(path, library.getId()));
+                                        .forEach(path -> {
+                                            if (registerPath(path, library.getId())) {
+                                                registeredCount[0]++;
+                                            }
+                                        });
                             } catch (IOException e) {
                                 log.error("Failed to register paths for library '{}': {}", library.getName(), e.getMessage(), e);
                             }
                         }
                     });
+                    log.info("Registered {} folders for library '{}'", registeredCount[0], library.getName());
                 });
 
-        log.info("📡 Registered {} libraries for recursive monitoring", libraries.size());
+        log.info("Registered {} libraries for recursive monitoring", libraries.size());
     }
 
-    public synchronized void registerPath(Path path, Long libraryId) {
+    public synchronized boolean registerPath(Path path, Long libraryId) {
         try {
             if (monitoredPaths.add(path)) {
                 path.register(watchService,
@@ -73,17 +80,18 @@ public class MonitoringService {
                         StandardWatchEventKinds.ENTRY_MODIFY,
                         StandardWatchEventKinds.ENTRY_DELETE);
                 pathToLibraryIdMap.put(path, libraryId);
-                log.info("✅ Registered folder: {} (Library ID: {})", path, libraryId);
+                return true;
             }
         } catch (IOException e) {
-            log.error("❌ Error registering path: {}", path, e);
+            log.error("Error registering path: {}", path, e);
         }
+        return false;
     }
 
     public synchronized void unregisterPath(Path path) {
         if (monitoredPaths.remove(path)) {
             pathToLibraryIdMap.remove(path);
-            log.info("🗑️ Unregistered path: {}", path);
+            log.info("Unregistered path: {}", path);
         }
     }
 
@@ -112,39 +120,35 @@ public class MonitoringService {
 
         boolean isRelevantFile = isRelevantBookFile(fullPath);
 
-        // ⏩ Skip events we don't care about
         if (!(isDir || isRelevantFile)) {
             return;
         }
 
-        // 📁 Register subfolders for new directory creation
         if (isDir && kind == StandardWatchEventKinds.ENTRY_CREATE) {
             Long parentLibraryId = pathToLibraryIdMap.get(event.getWatchedFolder());
             if (parentLibraryId != null) {
                 try (Stream<Path> stream = Files.walk(fullPath)) {
                     stream.filter(Files::isDirectory).forEach(path -> registerPath(path, parentLibraryId));
                 } catch (IOException e) {
-                    log.warn("⚠️ Failed to register nested paths: {}", fullPath, e);
+                    log.warn("Failed to register nested paths: {}", fullPath, e);
                 }
             }
         }
 
-        // 🗑️ Unregister on directory deletion
         if (isDir && kind == StandardWatchEventKinds.ENTRY_DELETE) {
-            log.info("🗑️ Unregistered path: {}", fullPath);
+            log.info("Unregistered path: {}", fullPath);
             unregisterSubPaths(fullPath);
         }
 
-        // 📥 Always queue relevant events
         if (!eventQueue.offer(event)) {
-            log.warn("⚠️ Event queue full, dropping: {}", fullPath);
+            log.warn("Event queue full, dropping: {}", fullPath);
         } else {
-            log.debug("📥 Queued: {} [{}]", fullPath, kind.name());
+            log.debug("Queued: {} [{}]", fullPath, kind.name());
         }
     }
 
     private void startProcessingThread() {
-        log.info("🚀 Starting file change processor...");
+        log.info("Starting file change processor...");
         singleThreadExecutor.submit(() -> {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
@@ -154,7 +158,7 @@ public class MonitoringService {
                     Thread.currentThread().interrupt();
                     break;
                 } catch (Exception e) {
-                    log.error("❌ Error in processing thread", e);
+                    log.error("Error in processing thread", e);
                 }
             }
         });
@@ -169,21 +173,21 @@ public class MonitoringService {
             try {
                 libraryFileEventProcessor.processFile(event.getEventKind(), libraryId, watchedFolder.toString(), filePath.toString());
             } catch (InvalidDataAccessApiUsageException e) {
-                log.debug("⚠️ InvalidDataAccessApiUsageException for libraryId={}", libraryId);
+                log.debug("InvalidDataAccessApiUsageException for libraryId={}", libraryId);
             }
         } else {
-            log.warn("⚠️ No library ID found for folder: {}", watchedFolder);
+            log.warn("No library ID found for folder: {}", watchedFolder);
         }
     }
 
     @PreDestroy
     public void stopMonitoring() {
-        log.info("🛑 Shutting down monitoring service...");
+        log.info("Shutting down monitoring service...");
         singleThreadExecutor.shutdownNow();
         try {
             watchService.close();
         } catch (IOException e) {
-            log.error("❌ Failed to close WatchService", e);
+            log.error("Failed to close WatchService", e);
         }
     }
 
@@ -205,9 +209,5 @@ public class MonitoringService {
                 || name.endsWith(".cbz")
                 || name.endsWith(".cbr")
                 || name.endsWith(".cb7");
-    }
-
-    public boolean isMonitoredFolder(Path path) {
-        return monitoredPaths.contains(path);
     }
 }
