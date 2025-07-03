@@ -65,7 +65,6 @@ export class SeriesCollapseFilter implements BookFilter {
             collapsedBooks.push(book);
           }
         }
-
         return {...bookState, books: collapsedBooks};
       })
     );
