@@ -1,5 +1,6 @@
-<div class="flex flex-row">
-  <div class="flex flex-col flex-grow">
+<div class="relative flex flex-row">
+  <div class="flex flex-col w-full">
+
     <div class="flex items-center justify-between w-full gap-4 p-2 rounded-t-xl mb-4 bg-[var(--card-background)]">
       <div class="flex items-center min-w-0 max-w-full flex-shrink">
         @if (entityType$ | async; as entityType) {
@@ -36,7 +37,6 @@
           }
         }
       </div>
-
       <div class="flex flex-wrap items-center gap-4 flex-shrink-0">
         <div class="flex flex-wrap items-center gap-4">
           @if (isFilterActive) {
@@ -352,5 +352,18 @@
     }
   </div>
 
-  <app-book-filter [entity$]="entity$" [entityType$]="entityType$" [resetFilter$]="resetFilterSubject"></app-book-filter>
+  @if (this.showFilter) {
+    <div
+      class="mobile-filter-mask"
+      (click)="this.showFilter = false">
+    </div>
+    <app-book-filter
+      [showFilter]="showFilter"
+      class="filter-overlay-container z-50 flex-shrink-0"
+      [ngClass]="{ 'active': this.showFilter }"
+      [entity$]="entity$"
+      [entityType$]="entityType$"
+      [resetFilter$]="resetFilterSubject">
+    </app-book-filter>
+  }
 </div>

@@ -147,6 +147,7 @@ export class BookBrowserComponent implements OnInit, AfterViewInit {
   protected metadataMenuItems: MenuItem[] | undefined;
   currentBooks: Book[] = [];
   lastSelectedIndex: number | null = null;
+  showFilter: boolean = false;
 
   get currentCardSize() {
     return this.coverScalePreferenceService.currentCardSize;
@@ -309,7 +310,7 @@ export class BookBrowserComponent implements OnInit, AfterViewInit {
           : VIEW_MODES.GRID)
         : (effectivePrefs.view?.toLowerCase() ?? VIEW_MODES.GRID);
 
-      this.bookFilterComponent.showFilters = sidebarParam === 'true' || (sidebarParam === null && this.filterVisibility);
+      //this.showFilter = sidebarParam === 'true' || (sidebarParam === null && this.filterVisibility);
 
       this.bookSorter.updateSortOptions();
 
@@ -322,7 +323,7 @@ export class BookBrowserComponent implements OnInit, AfterViewInit {
         [QUERY_PARAMS.VIEW]: this.currentViewMode,
         [QUERY_PARAMS.SORT]: this.bookSorter.selectedSort.field,
         [QUERY_PARAMS.DIRECTION]: this.bookSorter.selectedSort.direction === SortDirection.ASCENDING ? SORT_DIRECTION.ASCENDING : SORT_DIRECTION.DESCENDING,
-        [QUERY_PARAMS.SIDEBAR]: this.bookFilterComponent.showFilters.toString(),
+        [QUERY_PARAMS.SIDEBAR]: this.showFilter.toString(),
         [QUERY_PARAMS.FILTER]: Object.entries(parsedFilters).map(([k, v]) => `${k}:${v.join('|')}`).join(',')
       };
 
@@ -612,10 +613,10 @@ export class BookBrowserComponent implements OnInit, AfterViewInit {
   }
 
   toggleFilterSidebar() {
-    this.bookFilterComponent.showFilters = !this.bookFilterComponent.showFilters;
+    this.showFilter = !this.showFilter;
     this.router.navigate([], {
       queryParams: {
-        [QUERY_PARAMS.SIDEBAR]: this.bookFilterComponent.showFilters.toString()
+        [QUERY_PARAMS.SIDEBAR]: this.showFilter.toString()
       },
       queryParamsHandling: 'merge',
       replaceUrl: true
@@ -673,4 +674,5 @@ export class BookBrowserComponent implements OnInit, AfterViewInit {
   moveFiles() {
     this.dialogHelperService.openFileMoverDialog(this.selectedBooks);
   }
+
 }
