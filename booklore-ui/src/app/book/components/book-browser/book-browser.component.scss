@@ -124,10 +124,20 @@
 
   @media (min-width: 992px) {
     margin-left: 16px;
-    width: 225px;
-    position: static;
-    transform: none;
-    box-shadow: none;
-    transform: none !important;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+
+    &:not(.active) {
+      width: 0 !important;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    &.active {
+      width: 225px;
+      opacity: 1;
+      pointer-events: auto;
+    }
   }
 }

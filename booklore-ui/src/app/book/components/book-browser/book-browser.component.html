@@ -357,13 +357,14 @@
       class="mobile-filter-mask"
       (click)="this.showFilter = false">
     </div>
-    <app-book-filter
-      [showFilter]="showFilter"
-      class="filter-overlay-container z-50 flex-shrink-0"
-      [ngClass]="{ 'active': this.showFilter }"
-      [entity$]="entity$"
-      [entityType$]="entityType$"
-      [resetFilter$]="resetFilterSubject">
-    </app-book-filter>
   }
+
+  <app-book-filter
+    [showFilter]="showFilter"
+    class="filter-overlay-container z-50 flex-shrink-0"
+    [ngClass]="{ 'active': this.showFilter }"
+    [entity$]="entity$"
+    [entityType$]="entityType$"
+    [resetFilter$]="resetFilterSubject">
+  </app-book-filter>
 </div>
