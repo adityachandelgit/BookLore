@@ -1,10 +1,18 @@
 package com.adityachandel.booklore.service.fileprocessor;
 
+import com.adityachandel.booklore.model.dto.Book;
+import com.adityachandel.booklore.model.dto.settings.LibraryFile;
+import com.adityachandel.booklore.model.entity.BookEntity;
 import com.adityachandel.booklore.model.entity.BookMetadataEntity;
+import com.adityachandel.booklore.repository.BookRepository;
 import com.adityachandel.booklore.service.appsettings.AppSettingService;
 import com.adityachandel.booklore.util.FileService;
+import com.adityachandel.booklore.util.FileUtils;
+import com.adityachandel.booklore.mapper.BookMapper;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
@@ -17,6 +25,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Comparator;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -82,5 +92,31 @@ public class FileProcessingUtils {
             }
         }
         log.info("Deleted {} book covers", bookIds.size());
+    }
+
+    @Transactional
+    public Optional<Book> checkForDuplicateAndUpdateMetadataIfNeeded(LibraryFile libraryFile, String hash, boolean forceProcess, BookRepository bookRepository, BookMapper bookMapper) {
+        if (StringUtils.isBlank(hash)) {
+            log.warn("Skipping file due to missing hash: {}", libraryFile.getFullPath());
+            return Optional.empty();
+        }
+        Optional<BookEntity> existingByHash = bookRepository.findByCurrentHash(hash);
+        if (existingByHash.isPresent() && !forceProcess) {
+            BookEntity book = existingByHash.get();
+            String fileName = libraryFile.getFullPath().getFileName().toString();
+            if (!book.getFileName().equals(fileName)) {
+                book.setFileName(fileName);
+            }
+            if (!Objects.equals(book.getLibraryPath().getId(), libraryFile.getLibraryPathEntity().getId())) {
+                book.setLibraryPath(libraryFile.getLibraryPathEntity());
+                book.setFileSubPath(libraryFile.getFileSubPath());
+            }
+            return Optional.of(bookMapper.toBook(book));
+        }
+        return Optional.empty();
+    }
+
+    public static String truncate(String input, int maxLength) {
+        return input == null ? null : (input.length() <= maxLength ? input : input.substring(0, maxLength));
     }
 }

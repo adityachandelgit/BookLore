@@ -79,6 +79,7 @@ export interface AppSettings {
   metadataRefreshOptions: MetadataRefreshOptions;
   coverResolution: string;
   uploadPattern: string;
+  movePattern: string;
   opdsServerEnabled: boolean;
   remoteAuthEnabled: boolean;
   oidcEnabled: boolean;
@@ -106,5 +107,6 @@ export enum AppSettingKey {
   METADATA_PROVIDER_SETTINGS = 'METADATA_PROVIDER_SETTINGS',
   METADATA_MATCH_WEIGHTS = 'METADATA_MATCH_WEIGHTS',
   METADATA_PERSISTENCE_SETTINGS = 'METADATA_PERSISTENCE_SETTINGS',
+  MOVE_FILE_PATTERN = 'MOVE_FILE_PATTERN',
   BOOK_DELETION_ENABLED = 'BOOK_DELETION_ENABLED'
 }

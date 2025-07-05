@@ -17,6 +17,7 @@ public class Book {
     private Long libraryId;
     private String fileName;
     private String filePath;
+    private String fileSubPath;
     private Long fileSizeKb;
     private String title;
     private Instant lastReadTime;
@@ -28,4 +29,5 @@ public class Book {
     private CbxProgress cbxProgress;
     private Set<Shelf> shelves;
     private String readStatus;
+    private LibraryPath libraryPath;
 }

@@ -73,7 +73,8 @@ public class AppSettingService {
 
         builder.coverResolution(settingPersistenceHelper.getOrCreateSetting(AppSettingKey.COVER_IMAGE_RESOLUTION, "250x350"));
         builder.autoBookSearch(Boolean.parseBoolean(settingPersistenceHelper.getOrCreateSetting(AppSettingKey.AUTO_BOOK_SEARCH, "true")));
-        builder.uploadPattern(settingPersistenceHelper.getOrCreateSetting(AppSettingKey.UPLOAD_FILE_PATTERN, ""));
+        builder.uploadPattern(settingPersistenceHelper.getOrCreateSetting(AppSettingKey.UPLOAD_FILE_PATTERN, "{currentFilename}"));
+        builder.movePattern(settingPersistenceHelper.getOrCreateSetting(AppSettingKey.MOVE_FILE_PATTERN, "{authors}/<{series}/><{seriesIndex}. >{title} - {authors}< ({year})>"));
         builder.similarBookRecommendation(Boolean.parseBoolean(settingPersistenceHelper.getOrCreateSetting(AppSettingKey.SIMILAR_BOOK_RECOMMENDATION, "true")));
         builder.opdsServerEnabled(Boolean.parseBoolean(settingPersistenceHelper.getOrCreateSetting(AppSettingKey.OPDS_SERVER_ENABLED, "false")));
         builder.oidcEnabled(Boolean.parseBoolean(settingPersistenceHelper.getOrCreateSetting(AppSettingKey.OIDC_ENABLED, "false")));

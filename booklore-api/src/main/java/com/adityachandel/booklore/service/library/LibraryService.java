@@ -58,7 +58,7 @@ public class LibraryService {
     @PostConstruct
     public void initializeMonitoring() {
         List<Library> libraries = libraryRepository.findAll().stream().map(libraryMapper::toLibrary).collect(Collectors.toList());
-        monitoringService.registerLibrariesForMonitoring(libraries);
+        monitoringService.registerLibraries(libraries);
         log.info("Monitoring initialized with {} libraries", libraries.size());
     }
 
@@ -112,14 +112,9 @@ public class LibraryService {
         LibraryEntity savedLibrary = libraryRepository.save(library);
 
         if (request.isWatch()) {
-            for (LibraryPathEntity pathEntity : savedLibrary.getLibraryPaths()) {
-                Path path = Paths.get(pathEntity.getPath());
-                monitoringService.registerPath(path, libraryId);
-            }
+            monitoringService.registerLibraries(List.of(libraryMapper.toLibrary(savedLibrary)));
         } else {
-            for (LibraryPathEntity pathEntity : savedLibrary.getLibraryPaths()) {
-                monitoringService.unregisterPath(pathEntity.getPath());
-            }
+            monitoringService.unregisterLibrary(libraryId);
         }
 
         if (!newPaths.isEmpty()) {
@@ -212,7 +207,7 @@ public class LibraryService {
         LibraryEntity library = libraryRepository.findById(id).orElseThrow(() -> ApiError.LIBRARY_NOT_FOUND.createException(id));
         library.getLibraryPaths().forEach(libraryPath -> {
             Path path = Paths.get(libraryPath.getPath());
-            monitoringService.unregisterPath(path.toString());
+            monitoringService.unregisterLibrary(id);
         });
         Set<Long> bookIds = library.getBookEntities().stream().map(BookEntity::getId).collect(Collectors.toSet());
         fileProcessingUtils.deleteBookCovers(bookIds);

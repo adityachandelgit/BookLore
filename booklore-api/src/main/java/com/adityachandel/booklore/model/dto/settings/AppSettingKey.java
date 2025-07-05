@@ -17,6 +17,7 @@ public enum AppSettingKey {
     COVER_IMAGE_RESOLUTION("cover_image_resolution", false),
     SIMILAR_BOOK_RECOMMENDATION("similar_book_recommendation", false),
     UPLOAD_FILE_PATTERN("upload_file_pattern", false),
+    MOVE_FILE_PATTERN("move_file_pattern", false),
     OPDS_SERVER_ENABLED("opds_server_enabled", false),
     OIDC_ENABLED("oidc_enabled", false),
     CBX_CACHE_SIZE_IN_MB("cbx_cache_size_in_mb", false),

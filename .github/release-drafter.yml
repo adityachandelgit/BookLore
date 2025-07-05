@@ -2,9 +2,11 @@ name-template: 'v$NEXT_PATCH_VERSION 🌟'
 tag-template: 'v$NEXT_PATCH_VERSION'
 
 categories:
-  - title: '🚀 Features'
+  - title: '🚀 New Features'
     labels:
       - 'feature'
+  - title: '✨ Enhancements'
+    labels:
       - 'enhancement'
   - title: '🐛 Bug Fixes'
     labels:

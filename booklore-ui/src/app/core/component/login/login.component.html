@@ -1,41 +1,79 @@
-<div class="login-container" >
-  <div class="login-wrapper">
-    <h1 class="app-title">BookLore</h1>
-    <p-card class="w-96">
-      <ng-template pTemplate="title">
-        <div class="text-center pb-2">Login</div>
-      </ng-template>
-      <ng-template pTemplate="content">
+<div class="flex items-center justify-center min-h-screen min-w-[100vw] overflow-hidden"
+     style="background: linear-gradient(60deg, var(--primary-color) 0%, #1e3a8a 100%);">
+  <div class="flex flex-col items-center justify-center -mt-48">
+    <div style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)">
+      <div class="w-full bg-surface-0 dark:bg-surface-900 py-16 px-8 sm:px-16" style="border-radius: 53px">
+        <div class="text-center mb-8">
+          <svg class="mb-8 w-16 h-16 mx-auto" viewBox="0 0 126 126" fill="var(--primary-color)" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M59 4.79297C71.5051 11.5557 80 24.7854 80 40C80 40.5959 79.987 41.1888 79.9609 41.7783C79.8609 44.0406 81.7355 46 84 46C106.091 46 124 63.9086 124 86C124 108.091 106.091 126 84 126H10C4.47715 126 0 121.523 0 116V39.0068L0.0126953 38.9941C0.357624 25.0252 7.86506 12.8347 19 5.95215V63.832C19 64.8345 20.0676 65.4391 20.9121 64.9902L21.0771 64.8867L38.2227 52.3428C38.6819 52.0068 39.3064 52.0068 39.7656 52.3428L56.9229 64.8945L57.0879 64.998C57.9324 65.447 59 64.8423 59 63.8398V4.79297Z"/>
+            <path
+              d="M40 0C43.8745 0 47.6199 0.552381 51.1631 1.58008V50.9697L44.3926 46.0176L44.0879 45.8037C40.9061 43.6679 36.7098 43.7393 33.5957 46.0176L26.8369 50.9619V2.21875C30.9593 0.782634 35.3881 0 40 0Z"
+              fill="white"/>
+          </svg>
+          <div class="text-3xl font-medium mb-4">Welcome to Booklore</div>
+          <span class="text-muted-color font-medium">Sign in to continue</span>
+        </div>
+
         <form class="flex flex-col gap-4" #loginForm="ngForm" (ngSubmit)="login()">
           <div class="flex flex-col gap-2">
-            <label for="username">Username</label>
-            <input fluid pInputText id="username" [(ngModel)]="username" name="username" required/>
+            <label for="username" class="text-xl font-medium">Username</label>
+            <input
+              pInputText
+              id="username"
+              name="username"
+              required
+              [(ngModel)]="username"
+              placeholder="Enter your username"
+              class="w-full md:w-[30rem]"
+            />
           </div>
+
           <div class="flex flex-col gap-2">
-            <label for="password">Password</label>
-            <p-password fluid id="password" [(ngModel)]="password" name="password" [feedback]="false" required></p-password>
+            <label for="password" class="text-xl font-medium">Password</label>
+            <p-password
+              id="password"
+              name="password"
+              required
+              [(ngModel)]="password"
+              [feedback]="false"
+              placeholder="Enter your password"
+              [toggleMask]="true"
+              styleClass="mb-4"
+              [fluid]="true"
+            ></p-password>
           </div>
-          <div class="flex flex-col gap-3 mt-4">
+
+          <p-button
+            type="submit"
+            label="Login"
+            icon="pi pi-sign-in"
+            [disabled]="!loginForm.valid || !username || !password"
+            styleClass="w-full"
+          ></p-button>
+
+          @if (errorMessage) {
+            <p-message severity="error" text="{{ errorMessage }}"></p-message>
+          }
+
+          @if (oidcEnabled) {
+            <div class="flex items-center gap-2 my-2">
+              <hr class="flex-grow" style="border: none; border-top: 1px solid var(--border-color);"/>
+              <span class="text-gray-300">or</span>
+              <hr class="flex-grow" style="border: none; border-top: 1px solid var(--border-color);"/>
+            </div>
+
             <p-button
               fluid
-              severity="primary"
-              type="submit"
-              label="Login"
-              icon="pi pi-sign-in"
-              [disabled]="!loginForm.valid || !username || !password">
-            </p-button>
-            @if (errorMessage) {
-              <p-message severity="error" text="{{ errorMessage }}"></p-message>
-            }
-            @if (oidcEnabled) {
-              <div>
-                <p-divider></p-divider>
-                <p-button fluid severity="info" type="button" label="Login with {{oidcName}}" icon="pi pi-id-card" (click)="loginWithOidc()"></p-button>
-              </div>
-            }
-          </div>
+              severity="info"
+              label="Login with {{ oidcName }}"
+              icon="pi pi-id-card"
+              (click)="loginWithOidc()"
+              styleClass="w-full bg-gray-800 text-white hover:bg-gray-700"
+            />
+          }
         </form>
-      </ng-template>
-    </p-card>
+      </div>
+    </div>
   </div>
 </div>

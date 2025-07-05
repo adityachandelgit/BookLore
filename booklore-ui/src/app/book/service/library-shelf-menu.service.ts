@@ -56,6 +56,11 @@ export class LibraryShelfMenuService {
                 header: 'Confirmation',
                 rejectButtonProps: {
                   label: 'Cancel',
+                  severity: 'secondary',
+                },
+                acceptButtonProps: {
+                  label: 'Yes',
+                  severity: 'success',
                 },
                 accept: () => {
                   this.libraryService.deleteLibrary(entity?.id!).subscribe({
@@ -84,6 +89,11 @@ export class LibraryShelfMenuService {
                 header: 'Confirmation',
                 rejectButtonProps: {
                   label: 'Cancel',
+                  severity: 'secondary',
+                },
+                acceptButtonProps: {
+                  label: 'Yes',
+                  severity: 'success',
                 },
                 accept: () => {
                   this.libraryService.refreshLibrary(entity?.id!).subscribe({

@@ -120,7 +120,16 @@ export class LibraryService {
     return this.libraryStateSubject.value.libraries || [];
   }
 
-  getAllLibrariesFromAPI(): Observable<Library[]> {
-    return this.http.get <Library[]>(`${this.url}`);
+  getLibraryPathById(pathId: number): string | undefined {
+    const libraries = this.libraryStateSubject.value.libraries || [];
+
+    for (const library of libraries) {
+      const match = library.paths.find(p => p.id === pathId);
+      if (match) {
+        return match.path;
+      }
+    }
+
+    return undefined;
   }
 }

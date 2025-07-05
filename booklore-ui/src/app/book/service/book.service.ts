@@ -420,10 +420,23 @@ export class BookService {
 
   handleBookUpdate(updatedBook: Book) {
     const currentState = this.bookStateSubject.value;
-    const updatedBooks = (currentState.books || []).map(book => {
-      return book.id == updatedBook.id ? {...book, metadata: updatedBook.metadata} : book
-    });
+    const updatedBooks = (currentState.books || []).map(book =>
+      book.id === updatedBook.id ? updatedBook : book
+    );
     this.bookStateSubject.next({...currentState, books: updatedBooks});
+  }
+
+  handleMultipleBookUpdates(updatedBooks: Book[]): void {
+    const currentState = this.bookStateSubject.value;
+    const currentBooks = currentState.books || [];
+
+    const updatedMap = new Map(updatedBooks.map(book => [book.id, book]));
+
+    const mergedBooks = currentBooks.map(book =>
+      updatedMap.has(book.id) ? updatedMap.get(book.id)! : book
+    );
+
+    this.bookStateSubject.next({ ...currentState, books: mergedBooks });
   }
 
   handleBookMetadataUpdate(bookId: number, updatedMetadata: BookMetadata) {

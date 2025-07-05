@@ -16,6 +16,7 @@ import com.adityachandel.booklore.service.metadata.backuprestore.MetadataBackupR
 import com.adityachandel.booklore.service.metadata.backuprestore.MetadataBackupRestoreFactory;
 import com.adityachandel.booklore.service.metadata.writer.MetadataWriterFactory;
 import com.adityachandel.booklore.util.FileService;
+import com.adityachandel.booklore.util.FileUtils;
 import com.adityachandel.booklore.util.MetadataChangeDetector;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -113,6 +114,8 @@ public class BookMetadataUpdater {
 
                     File file = new File(bookEntity.getFullFilePath().toUri());
                     writer.writeMetadataToFile(file, metadata, thumbnailUrl, false, clearFlags);
+                    String newHash = FileUtils.computeFileHash(bookEntity);
+                    bookEntity.setCurrentHash(newHash);
                     log.info("Metadata written for book ID {}", bookId);
 
                 } catch (Exception e) {

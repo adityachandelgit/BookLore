@@ -16,6 +16,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -86,11 +87,8 @@ public class EpubMetadataExtractor implements FileMetadataExtractor {
                                 }
                             }
                             case "date" -> {
-                                try {
-                                    builderMeta.publishedDate(LocalDate.parse(text));
-                                } catch (Exception e) {
-                                    log.warn("Invalid date format in OPF: {}", text);
-                                }
+                                LocalDate parsed = parseDate(text);
+                                if (parsed != null) builderMeta.publishedDate(parsed);
                             }
                             case "meta" -> {
                                 String name = el.getAttribute("name").trim().toLowerCase();
@@ -112,10 +110,7 @@ public class EpubMetadataExtractor implements FileMetadataExtractor {
                                 }
 
                                 if (name.equals("calibre:pages") || name.equals("pagecount") || prop.equals("schema:pagecount") || prop.equals("media:pagecount") || prop.equals("booklore:page_count")) {
-                                    try {
-                                        builderMeta.pageCount(Integer.parseInt(content));
-                                    } catch (NumberFormatException ignored) {
-                                    }
+                                    safeParseInt(content, builderMeta::pageCount);
                                 }
 
                                 if (name.equals("calibre:rating") || prop.equals("booklore:personal_rating")) {
@@ -128,6 +123,23 @@ public class EpubMetadataExtractor implements FileMetadataExtractor {
                                     case "booklore:hardcover_id" -> builderMeta.hardcoverId(content);
                                     case "booklore:google_books_id" -> builderMeta.googleId(content);
                                     case "booklore:page_count" -> safeParseInt(content, builderMeta::pageCount);
+                                }
+                            }
+                        }
+                    }
+
+                    if (builderMeta.build().getPublishedDate() == null) {
+                        for (int i = 0; i < children.getLength(); i++) {
+                            if (!(children.item(i) instanceof Element el)) continue;
+                            if (!"meta".equals(el.getLocalName())) continue;
+
+                            String prop = el.getAttribute("property").trim().toLowerCase();
+                            String content = el.hasAttribute("content") ? el.getAttribute("content").trim() : el.getTextContent().trim();
+                            if ("dcterms:modified".equals(prop)) {
+                                LocalDate parsed = parseDate(content);
+                                if (parsed != null) {
+                                    builderMeta.publishedDate(parsed);
+                                    break;
                                 }
                             }
                         }
@@ -157,5 +169,27 @@ public class EpubMetadataExtractor implements FileMetadataExtractor {
             setter.accept(Double.parseDouble(value));
         } catch (NumberFormatException ignored) {
         }
+    }
+
+    private LocalDate parseDate(String value) {
+        if (StringUtils.isBlank(value)) return null;
+
+        try {
+            return LocalDate.parse(value);
+        } catch (Exception ignored) {
+        }
+
+        try {
+            return OffsetDateTime.parse(value).toLocalDate();
+        } catch (Exception ignored) {
+        }
+
+        try {
+            return LocalDate.parse(value.substring(0, 10)); // fallback to prefix
+        } catch (Exception ignored) {
+        }
+
+        log.warn("Failed to parse date from string: {}", value);
+        return null;
     }
 }

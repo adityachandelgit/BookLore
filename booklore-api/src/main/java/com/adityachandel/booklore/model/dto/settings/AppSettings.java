@@ -17,6 +17,7 @@ public class AppSettings {
     private boolean similarBookRecommendation;
     private boolean opdsServerEnabled;
     private String uploadPattern;
+    private String movePattern;
     private Integer cbxCacheSizeInMb;
     private Integer pdfCacheSizeInMb;
     private Integer maxFileUploadSizeInMb;

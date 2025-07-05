@@ -9,10 +9,9 @@ import com.adityachandel.booklore.model.enums.BookFileType;
 import com.adityachandel.booklore.repository.BookMetadataRepository;
 import com.adityachandel.booklore.repository.BookRepository;
 import com.adityachandel.booklore.service.BookCreatorService;
-import com.adityachandel.booklore.service.metadata.extractor.PdfMetadataExtractor;
 import com.adityachandel.booklore.service.metadata.MetadataMatchService;
+import com.adityachandel.booklore.service.metadata.extractor.PdfMetadataExtractor;
 import com.adityachandel.booklore.util.FileUtils;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pdfbox.Loader;
@@ -20,58 +19,44 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Optional;
+
+import static com.adityachandel.booklore.service.fileprocessor.FileProcessingUtils.truncate;
 
 @Slf4j
 @Service
-@AllArgsConstructor
-public class PdfProcessor implements FileProcessor {
+public class PdfProcessor extends AbstractFileProcessor implements BookFileProcessor {
 
-    private final BookRepository bookRepository;
-    private final BookCreatorService bookCreatorService;
-    private final BookMapper bookMapper;
-    private final FileProcessingUtils fileProcessingUtils;
-    private final BookMetadataRepository bookMetadataRepository;
-    private final MetadataMatchService metadataMatchService;
     private final PdfMetadataExtractor pdfMetadataExtractor;
+    private final BookMetadataRepository bookMetadataRepository;
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @Override
-    public Book processFile(LibraryFile libraryFile, boolean forceProcess) {
-        File bookFile = new File(libraryFile.getFileName());
-        String fileName = bookFile.getName();
-        if (!forceProcess) {
-            Optional<BookEntity> bookOptional = bookRepository.findBookByFileNameAndLibraryId(fileName, libraryFile.getLibraryEntity().getId());
-            return bookOptional
-                    .map(bookMapper::toBook)
-                    .orElseGet(() -> processNewFile(libraryFile));
-        } else {
-            return processNewFile(libraryFile);
-        }
+    public PdfProcessor(BookRepository bookRepository,
+                        BookCreatorService bookCreatorService,
+                        BookMapper bookMapper,
+                        FileProcessingUtils fileProcessingUtils,
+                        BookMetadataRepository bookMetadataRepository,
+                        MetadataMatchService metadataMatchService,
+                        PdfMetadataExtractor pdfMetadataExtractor) {
+        super(bookRepository, bookCreatorService, bookMapper, fileProcessingUtils, bookMetadataRepository, metadataMatchService);
+        this.pdfMetadataExtractor = pdfMetadataExtractor;
+        this.bookMetadataRepository = bookMetadataRepository;
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    protected Book processNewFile(LibraryFile libraryFile) {
+    @Override
+    public Book processNewFile(LibraryFile libraryFile) {
         BookEntity bookEntity = bookCreatorService.createShellBook(libraryFile, BookFileType.PDF);
         if (generateCover(bookEntity)) {
             fileProcessingUtils.setBookCoverPath(bookEntity.getId(), bookEntity.getMetadata());
         }
-        setMetadata(bookEntity);
-        Float score = metadataMatchService.calculateMatchScore(bookEntity);
-        bookEntity.setMetadataMatchScore(score);
-        bookCreatorService.saveConnections(bookEntity);
-        bookEntity = bookRepository.save(bookEntity);
-        bookRepository.flush();
-        return bookMapper.toBook(bookEntity);
+        extractAndSetMetadata(bookEntity);
+        return finishAndReturnBook(bookEntity);
     }
 
+    @Override
     public boolean generateCover(BookEntity bookEntity) {
         try (PDDocument pdf = Loader.loadPDF(new File(FileUtils.getBookFullPath(bookEntity)))) {
             boolean saved = generateCoverImageAndSave(bookEntity.getId(), pdf);
@@ -79,14 +64,15 @@ public class PdfProcessor implements FileProcessor {
             bookMetadataRepository.save(bookEntity.getMetadata());
             return saved;
         } catch (Exception e) {
-            log.error("Error generating cover for pdf file {}, error: {}", bookEntity.getFileName(), e.getMessage());
+            log.warn("Failed to generate cover for '{}': {}", bookEntity.getFileName(), e.getMessage());
+            return false;
         }
-        return false;
     }
 
-    private void setMetadata(BookEntity bookEntity) {
+    private void extractAndSetMetadata(BookEntity bookEntity) {
         try {
             BookMetadata extracted = pdfMetadataExtractor.extractMetadata(new File(FileUtils.getBookFullPath(bookEntity)));
+
             if (StringUtils.isNotBlank(extracted.getTitle())) {
                 bookEntity.getMetadata().setTitle(truncate(extracted.getTitle(), 1000));
             }
@@ -135,18 +121,14 @@ public class PdfProcessor implements FileProcessor {
             if (extracted.getCategories() != null) {
                 bookCreatorService.addCategoriesToBook(extracted.getCategories(), bookEntity);
             }
+
         } catch (Exception e) {
-            log.error("Failed to extract advanced PDF metadata for {}: {}", bookEntity.getFileName(), e.getMessage(), e);
+            log.warn("Failed to extract PDF metadata for '{}': {}", bookEntity.getFileName(), e.getMessage());
         }
     }
 
     private boolean generateCoverImageAndSave(Long bookId, PDDocument document) throws IOException {
         BufferedImage coverImage = new PDFRenderer(document).renderImageWithDPI(0, 300, ImageType.RGB);
         return fileProcessingUtils.saveCoverImage(coverImage, bookId);
-    }
-
-    private String truncate(String input, int maxLength) {
-        if (input == null) return null;
-        return input.length() <= maxLength ? input : input.substring(0, maxLength);
     }
 }

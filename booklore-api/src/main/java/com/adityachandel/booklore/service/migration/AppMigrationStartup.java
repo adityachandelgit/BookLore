@@ -15,5 +15,6 @@ public class AppMigrationStartup {
     public void runMigrationsOnce() {
         appMigrationService.populateMissingFileSizesOnce();
         appMigrationService.populateMetadataScoresOnce();
+        appMigrationService.populateFileHashesOnce();
     }
 }

@@ -49,23 +49,38 @@ export class SeriesCollapseFilter implements BookFilter {
       map(isCollapsed => {
         if (!isCollapsed || !bookState.books) return bookState;
 
-        const seenSeries = new Set<string>();
+        const books = [...bookState.books];
+
+        const seriesMap = new Map<string, Book[]>();
         const collapsedBooks: Book[] = [];
 
-        for (const book of bookState.books) {
-          const name = book.metadata?.seriesName?.trim();
-          if (name && !seenSeries.has(name)) {
-            const count = bookState.books.filter(b => b.metadata?.seriesName?.trim() === name).length;
-            collapsedBooks.push({
-              ...book,
-              seriesCount: count,
-            });
-            seenSeries.add(name);
-          } else if (!name) {
+        for (const book of books) {
+          const seriesName = book.metadata?.seriesName?.trim();
+          if (seriesName) {
+            if (!seriesMap.has(seriesName)) {
+              seriesMap.set(seriesName, []);
+            }
+            seriesMap.get(seriesName)!.push(book);
+          } else {
             collapsedBooks.push(book);
           }
         }
-        return {...bookState, books: collapsedBooks};
+
+        for (const [seriesName, group] of seriesMap.entries()) {
+          const sortedGroup = group.slice().sort((a, b) => {
+            const aNum = a.metadata?.seriesNumber ?? Number.MAX_VALUE;
+            const bNum = b.metadata?.seriesNumber ?? Number.MAX_VALUE;
+            return aNum - bNum;
+          });
+
+          const firstBook = sortedGroup[0];
+          collapsedBooks.push({
+            ...firstBook,
+            seriesCount: group.length
+          });
+        }
+
+        return { ...bookState, books: collapsedBooks };
       })
     );
   }

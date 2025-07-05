@@ -2,15 +2,11 @@ import {Component, inject, OnInit} from '@angular/core';
 import {AuthService} from '../../service/auth.service';
 import {Router} from '@angular/router';
 import {FormsModule} from '@angular/forms';
-
-import {Card} from 'primeng/card';
 import {Password} from 'primeng/password';
 import {Button} from 'primeng/button';
 import {Message} from 'primeng/message';
-import {PrimeTemplate} from 'primeng/api';
 import {InputText} from 'primeng/inputtext';
 import {OAuthService} from 'angular-oauth2-oidc';
-import {Divider} from 'primeng/divider';
 import {AppSettingsService} from '../../service/app-settings.service';
 import {AppSettings} from '../../model/app-settings.model';
 import {Observable} from 'rxjs';
@@ -20,14 +16,11 @@ import {filter, take} from 'rxjs/operators';
   selector: 'app-login',
   imports: [
     FormsModule,
-    Card,
     Password,
     Button,
     Message,
-    PrimeTemplate,
-    InputText,
-    Divider
-],
+    InputText
+  ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })

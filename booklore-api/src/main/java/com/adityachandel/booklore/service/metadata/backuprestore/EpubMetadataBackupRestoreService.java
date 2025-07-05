@@ -12,14 +12,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.documentnode.epub4j.domain.Book;
 import io.documentnode.epub4j.domain.Resource;
 import io.documentnode.epub4j.epub.EpubReader;
-import io.documentnode.epub4j.epub.EpubWriter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

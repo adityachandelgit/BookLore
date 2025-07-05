@@ -1,0 +1,154 @@
+<div class="p-fluid px-4 py-2 rounded-xl flex flex-col h-[800px]">
+
+  <div class="px-4 mx-2 mb-4 py-3 rounded-lg border border-[var(--border-color)] transition-all">
+    <p class="text-[var(--primary-color)] font-semibold mb-1">
+      Customize Your File Organization
+    </p>
+    <p class="text-sm text-gray-300 leading-relaxed">
+      Define a naming pattern to reorganize selected book files on your system. Use dynamic placeholders like
+      <code class="bg-gray-800 px-1 py-0.5 rounded text-[var(--primary-color)] font-mono text-xs">{{ '{title}' }}</code>
+      or
+      <code class="bg-gray-800 px-1 py-0.5 rounded text-[var(--primary-color)] font-mono text-xs">{{ '{authors}' }}</code>
+      to automatically insert metadata. <br>
+      A preview below shows how files will be renamed and moved.
+      Once you're satisfied, click <span class="font-semibold text-green-400">Apply</span> to proceed.
+      <span class="text-yellow-500 font-medium flex items-center gap-2">
+        <i class="pi pi-exclamation-triangle text-yellow-400"></i>
+        Files will be physically moved on your system when you apply changes.
+      </span>
+    </p>
+  </div>
+
+  <div class="mb-2 px-1 text-sm text-muted">
+    <p-button
+      size="small"
+      text
+      severity="info"
+      (click)="placeholdersVisible = !placeholdersVisible">
+      {{ placeholdersVisible ? 'Hide' : 'Show' }} available placeholders
+    </p-button>
+
+    @if (placeholdersVisible) {
+      <div class="mx-4 my-2 flex flex-wrap gap-4">
+        <ul class="list-disc pl-4 min-w-[250px]">
+          <li><code>{{ '{title}' }}</code> - Book title</li>
+          <li><code>{{ '{authors}' }}</code> - Author(s)</li>
+          <li><code>{{ '{year}' }}</code> - Full year (e.g. 2025)</li>
+          <li><code>{{ '{series}' }}</code> - Series name</li>
+          <li><code>{{ '{seriesIndex}' }}</code> - Series index (e.g. 01)</li>
+          <li><code>{{ '{language}' }}</code> - Language (e.g. en)</li>
+          <li><code>{{ '{publisher}' }}</code> - Publisher</li>
+          <li><code>{{ '{isbn}' }}</code> - ISBN</li>
+          <li><code>{{ '{currentFilename}' }}</code> - Original file name (with extension)</li>
+        </ul>
+
+        <p-divider layout="vertical"></p-divider>
+
+        <div class="text-sm p-3 min-w-[250px]">
+          <p class="mb-1 font-medium">Tip: Optional placeholders</p>
+          <p>Wrap parts of your pattern in angle brackets <code>{{ '<...>' }}</code> to make them optional.</p>
+          <p>If any placeholder inside has no value, the whole block is removed.</p>
+          <p class="mt-1 font-semibold">Example:</p>
+          <p><code>{{ '<{seriesIndex} - >{title}' }}</code></p>
+          <p class="pl-4 mt-1">• <code>{{ '01 - Dune' }}</code> (if <code>{{ '{seriesIndex}' }}</code> is present)</p>
+          <p class="pl-4">• <code>{{ 'Dune' }}</code> (if <code>{{ '{seriesIndex}' }}</code> is missing)</p>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="flex gap-2 mb-4 px-2 items-center w-full">
+    <input
+      type="text"
+      pInputText
+      [(ngModel)]="movePattern"
+      (ngModelChange)="applyPattern()"
+      [placeholder]="movePattern.trim() ? '' : getDefaultPattern()"
+      class="flex-1"
+    />
+
+    <p-button
+      icon="pi pi-save"
+      label="Make Default"
+      severity="info"
+      outlined
+      (click)="setDefaultPattern()"
+    ></p-button>
+  </div>
+
+  <div class="flex-grow overflow-y-auto mt-4">
+    <p-table
+      [value]="filePreviews"
+      [responsiveLayout]="'scroll'"
+      class="block min-w-full"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 0.5rem; text-align: center;">ID</th>
+          <th>Current Path</th>
+          <th></th>
+          <th>New Path</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-preview let-i="rowIndex">
+        <tr>
+          <td class="text-center">{{ preview.bookId }}</td>
+          <td class="w-auto">
+            <p>
+              <span class="text-gray-400 select-none">{{ preview.libraryPathPrefix }}/</span><span>{{ preview.relativeOriginalPath }}</span>
+            </p>
+          </td>
+          <td class="w-auto text-[var(--primary-color)] text-center">→</td>
+          <td class="w-auto">
+            <p>
+              <span class="text-gray-400 select-none">{{ preview.libraryPathPrefix }}/</span><span>{{ preview.relativeNewPath }}</span>
+            </p>
+          </td>
+          <td class="w-auto text-center">
+            @if (preview.isMoved) {
+              <i class="pi pi-check-circle text-green-600"></i>
+            }
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <p-divider></p-divider>
+
+  <div class="flex justify-end items-center gap-4 flex-shrink-0 px-4">
+    @if (movedFileCount > 0) {
+      <span class="text-green-500 flex items-center font-semibold drop-shadow-sm select-none">
+        {{ movedFileCount }} file{{ movedFileCount > 1 ? 's' : '' }} successfully moved
+        <i
+          class="pi pi-check-circle ml-2 text-green-500 animate-bounce"
+          style="animation-duration: 1.5s;"
+          aria-label="Success"
+          role="img"
+        ></i>
+      </span>
+    }
+    @if (movedFileCount === 0) {
+      <p-button
+        [label]="loading ? 'Moving...' : 'Move Files'"
+        [icon]="loading ? 'pi pi-spin pi-spinner' : 'pi pi-arrows-h'"
+        severity="success"
+        (click)="saveChanges()"
+        [disabled]="loading || filePreviews.length === 0"
+      ></p-button>
+      <p-button
+        label="Cancel"
+        icon="pi pi-times"
+        severity="danger"
+        (click)="cancel()"
+      ></p-button>
+    } @else {
+      <p-button
+        label="Close"
+        icon="pi pi-times"
+        severity="success"
+        (click)="cancel()"
+      ></p-button>
+    }
+  </div>
+</div>

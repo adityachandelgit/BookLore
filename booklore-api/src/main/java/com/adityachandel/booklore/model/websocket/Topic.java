@@ -7,6 +7,7 @@ public enum Topic {
     BOOK_ADD("/topic/book-add"),
     BOOKS_REMOVE("/topic/books-remove"),
     BOOK_METADATA_UPDATE("/topic/book-metadata-update"),
+    BOOK_METADATA_BATCH_UPDATE("/topic/book-metadata-batch-update"),
 
     LOG("/topic/log");
 
