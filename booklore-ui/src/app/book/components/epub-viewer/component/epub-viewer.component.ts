@@ -4,7 +4,7 @@ import {Drawer} from 'primeng/drawer';
 import {Button} from 'primeng/button';
 
 import {FormsModule} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, RouterLink} from '@angular/router';
 import {Book, BookSetting} from '../../../model/book.model';
 import {BookService} from '../../../service/book.service';
 import {forkJoin} from 'rxjs';
@@ -23,7 +23,7 @@ import {Divider} from 'primeng/divider';
   selector: 'app-epub-viewer',
   templateUrl: './epub-viewer.component.html',
   styleUrls: ['./epub-viewer.component.scss'],
-  imports: [Drawer, Button, FormsModule, Select, ProgressSpinner, Tooltip, Slider, RadioButton, Divider],
+  imports: [Drawer, Button, FormsModule, Select, ProgressSpinner, Tooltip, Slider, RadioButton, Divider, RouterLink],
   standalone: true
 })
 export class EpubViewerComponent implements OnInit, OnDestroy {
