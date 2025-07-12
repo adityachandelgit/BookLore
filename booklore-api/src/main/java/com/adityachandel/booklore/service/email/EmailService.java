@@ -85,6 +85,11 @@ public class EmailService {
         log.info("Book sent successfully to {}", recipientEmail);
     }
 
+    /**
+     * Enhanced email sender configuration with SSL support and extended timeouts
+     * Supports both STARTTLS (port 587) and SSL (port 465) connections
+     * Includes extended timeouts for slow SMTP servers (e.g., cPanel)
+     */
     private JavaMailSenderImpl setupMailSender(EmailProviderEntity emailProvider) {
         JavaMailSenderImpl dynamicMailSender = new JavaMailSenderImpl();
         dynamicMailSender.setHost(emailProvider.getHost());
@@ -94,11 +99,104 @@ public class EmailService {
 
         Properties mailProps = dynamicMailSender.getJavaMailProperties();
         mailProps.put("mail.smtp.auth", emailProvider.isAuth());
-        mailProps.put("mail.smtp.starttls.enable", emailProvider.isStartTls());
-        mailProps.put("mail.smtp.connectiontimeout", 15000);  // 15 seconds connection timeout
-        mailProps.put("mail.smtp.timeout", 15000);            // 15 seconds socket timeout
+        
+        // Determine connection type and configure accordingly
+        ConnectionType connectionType = determineConnectionType(emailProvider);
+        configureConnectionType(mailProps, connectionType, emailProvider);
+        
+        // Enhanced timeout configuration for slow SMTP servers
+        configureTimeouts(mailProps);
+        
+        // Enable debug mode for troubleshooting (can be controlled via environment variable)
+        String debugMode = System.getProperty("mail.debug", "false");
+        mailProps.put("mail.debug", debugMode);
+        
+        log.info("Email configuration: Host={}, Port={}, Type={}, Timeouts=60s", 
+                 emailProvider.getHost(), emailProvider.getPort(), connectionType);
 
         return dynamicMailSender;
+    }
+
+    /**
+     * Determines the connection type based on port and email provider settings
+     */
+    private ConnectionType determineConnectionType(EmailProviderEntity emailProvider) {
+        // Check if SSL is explicitly enabled via ssl_enable field
+        if (emailProvider.getSslEnable() != null && emailProvider.getSslEnable()) {
+            return ConnectionType.SSL;
+        }
+        
+        // Auto-detect based on port
+        if (emailProvider.getPort() == 465) {
+            return ConnectionType.SSL;
+        } else if (emailProvider.getPort() == 587 && emailProvider.isStartTls()) {
+            return ConnectionType.STARTTLS;
+        } else if (emailProvider.isStartTls()) {
+            return ConnectionType.STARTTLS;
+        } else {
+            return ConnectionType.PLAIN;
+        }
+    }
+
+    /**
+     * Configures mail properties based on connection type
+     */
+    private void configureConnectionType(Properties mailProps, ConnectionType connectionType, EmailProviderEntity emailProvider) {
+        switch (connectionType) {
+            case SSL -> {
+                // SSL Configuration (typically port 465)
+                mailProps.put("mail.transport.protocol", "smtps");
+                mailProps.put("mail.smtp.ssl.enable", "true");
+                mailProps.put("mail.smtp.ssl.trust", emailProvider.getHost());
+                mailProps.put("mail.smtp.starttls.enable", "false");
+                mailProps.put("mail.smtp.ssl.protocols", "TLSv1.2,TLSv1.3");
+                mailProps.put("mail.smtp.ssl.checkserveridentity", "false");
+                
+                // Additional SSL properties for better compatibility
+                mailProps.put("mail.smtp.ssl.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+                mailProps.put("mail.smtp.ssl.socketFactory.fallback", "false");
+                
+                log.debug("Configured SSL email for {}:{}", emailProvider.getHost(), emailProvider.getPort());
+            }
+            case STARTTLS -> {
+                // STARTTLS Configuration (typically port 587)
+                mailProps.put("mail.transport.protocol", "smtp");
+                mailProps.put("mail.smtp.starttls.enable", "true");
+                mailProps.put("mail.smtp.starttls.required", "true");
+                mailProps.put("mail.smtp.ssl.enable", "false");
+                
+                log.debug("Configured STARTTLS email for {}:{}", emailProvider.getHost(), emailProvider.getPort());
+            }
+            case PLAIN -> {
+                // Plain SMTP Configuration (typically port 25)
+                mailProps.put("mail.transport.protocol", "smtp");
+                mailProps.put("mail.smtp.starttls.enable", "false");
+                mailProps.put("mail.smtp.ssl.enable", "false");
+                
+                log.debug("Configured plain SMTP for {}:{}", emailProvider.getHost(), emailProvider.getPort());
+            }
+        }
+    }
+
+    /**
+     * Configures extended timeouts for slow SMTP servers
+     * Previous timeout values (15 seconds) were too short for many SMTP servers,
+     * especially cPanel and other shared hosting providers
+     */
+    private void configureTimeouts(Properties mailProps) {
+        // Extended timeout values (60 seconds) for better compatibility with slow SMTP servers
+        // These values can be overridden via system properties if needed
+        
+        String connectionTimeout = System.getProperty("mail.smtp.connectiontimeout", "60000");
+        String socketTimeout = System.getProperty("mail.smtp.timeout", "60000"); 
+        String writeTimeout = System.getProperty("mail.smtp.writetimeout", "60000");
+        
+        mailProps.put("mail.smtp.connectiontimeout", connectionTimeout);  // 60 seconds (was 15)
+        mailProps.put("mail.smtp.timeout", socketTimeout);                // 60 seconds (was 15)
+        mailProps.put("mail.smtp.writetimeout", writeTimeout);            // 60 seconds (new)
+        
+        log.debug("Configured email timeouts: connection={}, socket={}, write={}", 
+                  connectionTimeout, socketTimeout, writeTimeout);
     }
 
     private String generateEmailBody(String bookTitle) {
@@ -109,5 +207,14 @@ public class EmailService {
                 
                 Thank you for using Booklore! We hope you enjoy your book.
                 """, bookTitle);
+    }
+
+    /**
+     * Enum representing different email connection types
+     */
+    private enum ConnectionType {
+        SSL,        // Secure connection from start (typically port 465)
+        STARTTLS,   // Start plain, upgrade to secure (typically port 587)
+        PLAIN       // Plain SMTP connection (typically port 25)
     }
 }
