@@ -20,6 +20,7 @@
   overflow: hidden;
 }
 
+.home-button,
 .menu-toggle-button,
 .settings-toggle-button {
   top: 10px;
@@ -27,8 +28,10 @@
   margin: 0;
 }
 
+.home-button
 .menu-toggle-button {
   left: 10px;
+  margin-left: 10px;
 }
 
 .settings-toggle-button {

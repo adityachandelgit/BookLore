@@ -8,6 +8,9 @@
     <div>
       <div class="epub-header">
         <div>
+          <a routerLink="/dashboard" class="home-button inline-block">
+            <p-button size="small" icon="pi pi-home" severity="secondary"></p-button>
+          </a>
           <p-button size="small" class="menu-toggle-button" (click)="toggleDrawer()" icon="pi pi-bars" severity="secondary"></p-button>
           <p-drawer [(visible)]="isDrawerVisible" [modal]="false" [position]="'left'" header="Chapters">
             <ul class="chapter-list">
