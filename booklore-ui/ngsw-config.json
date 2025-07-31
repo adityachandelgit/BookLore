@@ -1,0 +1,30 @@
+{
+  "$schema": "./node_modules/@angular/service-worker/config/schema.json",
+  "index": "/dashboard",
+  "assetGroups": [
+    {
+      "name": "app",
+      "installMode": "prefetch",
+      "resources": {
+        "files": [
+          "/**"
+        ]
+      }
+    }
+  ],
+  "dataGroups": [
+    {
+      "name": "cache",
+      "urls": [
+        "/**"
+      ],
+      "cacheConfig": {
+        "maxSize": 50000,
+        "maxAge": "365d",
+        "timeout": "10s",
+        "strategy": "freshness"
+      },
+      "credentials": "include"
+    }
+  ]
+}
