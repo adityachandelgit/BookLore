@@ -49,7 +49,7 @@ export function serializeDateRules(ruleOrGroup: any): any {
     };
   }
 
-  const isDateField = ruleOrGroup.field === 'publishedDate';
+  const isDateField = ruleOrGroup.field === 'publishedDate' || ruleOrGroup.field === 'dateFinished';
   const serialize = (val: any) => (val instanceof Date ? val.toISOString().split('T')[0] : val);
 
   return {

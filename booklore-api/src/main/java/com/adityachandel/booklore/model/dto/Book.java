@@ -29,5 +29,6 @@ public class Book {
     private CbxProgress cbxProgress;
     private Set<Shelf> shelves;
     private String readStatus;
+    private Instant dateFinished;
     private LibraryPath libraryPath;
 }

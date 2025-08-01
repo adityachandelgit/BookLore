@@ -231,6 +231,11 @@
                   {{ getStatusLabel(selectedReadStatus) }}
               </span>
                 <p-menu #menu [popup]="true" [model]="readStatusMenuItems"></p-menu>
+                @if (selectedReadStatus === 'READ' && book?.dateFinished) {
+                  <span class="text-xs text-gray-400 ml-2">
+                    Finished on {{ formatDate(book.dateFinished) }}
+                  </span>
+                }
               </p>
               <p class="whitespace-nowrap flex items-center">
                 <span class="font-bold mr-2">Progress:</span>

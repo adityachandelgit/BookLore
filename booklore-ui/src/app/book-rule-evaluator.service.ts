@@ -193,6 +193,8 @@ export class BookRuleEvaluatorService {
         return book.metadata?.publisher?.toLowerCase() ?? null;
       case 'publishedDate':
         return book.metadata?.publishedDate ? new Date(book.metadata.publishedDate) : null;
+      case 'dateFinished':
+        return book.dateFinished ? new Date(book.dateFinished) : null;
       case 'seriesName':
         return book.metadata?.seriesName?.toLowerCase() ?? null;
       case 'seriesNumber':

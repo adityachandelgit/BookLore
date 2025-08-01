@@ -62,6 +62,9 @@
                   @if (ruleCtrl.get('field')?.value === 'publishedDate') {
                     <p-datepicker [formControl]="ruleCtrl.get('valueStart')" dateFormat="dd-M-yy" placeholder="Start Year" appendTo="body" fluid class="w-full"></p-datepicker>
                     <p-datepicker [formControl]="ruleCtrl.get('valueEnd')" dateFormat="dd-M-yy" placeholder="End Year" appendTo="body" fluid class="w-full"></p-datepicker>
+                  } @else if (ruleCtrl.get('field')?.value === 'dateFinished') {
+                    <p-datepicker [formControl]="ruleCtrl.get('valueStart')" dateFormat="dd-M-yy" placeholder="Start Date" appendTo="body" fluid class="w-full"></p-datepicker>
+                    <p-datepicker [formControl]="ruleCtrl.get('valueEnd')" dateFormat="dd-M-yy" placeholder="End Date" appendTo="body" fluid class="w-full"></p-datepicker>
                   } @else if (numericFieldConfigMap.get(ruleCtrl.get('field')?.value)?.type === 'number') {
                     <p-inputNumber [formControl]="ruleCtrl.get('valueStart')" [min]="0" class="w-full" placeholder="Start Value" [showButtons]="true"></p-inputNumber>
                     <p-inputNumber [formControl]="ruleCtrl.get('valueEnd')" [min]="0" class="w-full" placeholder="End Value" [showButtons]="true"></p-inputNumber>
@@ -74,6 +77,8 @@
                   }
                 } @else {
                   @if (ruleCtrl.get('field')?.value === 'publishedDate') {
+                    <p-datepicker formControlName="value" dateFormat="dd-M-yy" appendTo="body" fluid class="w-full"></p-datepicker>
+                  } @else if (ruleCtrl.get('field')?.value === 'dateFinished') {
                     <p-datepicker formControlName="value" dateFormat="dd-M-yy" appendTo="body" fluid class="w-full"></p-datepicker>
                   } @else if (numericFieldConfigMap.get(ruleCtrl.get('field')?.value)?.type === 'number') {
                     <p-inputNumber formControlName="value" class="w-full" mode="decimal" placeholder="Value" [showButtons]="true"></p-inputNumber>

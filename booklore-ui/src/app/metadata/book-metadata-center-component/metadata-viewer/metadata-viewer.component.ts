@@ -1,6 +1,6 @@
 import {Component, DestroyRef, inject, Input, OnChanges, OnInit, Optional, SimpleChanges, ViewChild} from '@angular/core';
 import {Button} from 'primeng/button';
-import {AsyncPipe, DecimalPipe, NgClass} from '@angular/common';
+import {AsyncPipe, DatePipe, DecimalPipe, NgClass} from '@angular/common';
 import {Observable} from 'rxjs';
 import {BookService} from '../../../book/service/book.service';
 import {Rating, RatingRateEvent} from 'primeng/rating';
@@ -34,7 +34,7 @@ import {BookCardLiteComponent} from '../../../book/components/book-card-lite/boo
   standalone: true,
   templateUrl: './metadata-viewer.component.html',
   styleUrl: './metadata-viewer.component.scss',
-  imports: [Button, AsyncPipe, Rating, FormsModule, Tag, Divider, SplitButton, NgClass, Tooltip, DecimalPipe, Editor, ProgressBar, Menu, InfiniteScrollDirective, BookCardLiteComponent]
+  imports: [Button, AsyncPipe, Rating, FormsModule, Tag, Divider, SplitButton, NgClass, Tooltip, DecimalPipe, DatePipe, Editor, ProgressBar, Menu, InfiniteScrollDirective, BookCardLiteComponent]
 })
 export class MetadataViewerComponent implements OnInit, OnChanges {
 
@@ -480,8 +480,9 @@ export class MetadataViewerComponent implements OnInit, OnChanges {
       }
 
       this.bookService.updateBookReadStatus(book.id, status).subscribe({
-        next: () => {
+        next: (updatedBooks) => {
           this.selectedReadStatus = status;
+          // The book state will be updated automatically by the service
           this.messageService.add({
             severity: 'success',
             summary: 'Read Status Updated',
@@ -530,6 +531,16 @@ export class MetadataViewerComponent implements OnInit, OnChanges {
           }
         });
       }
+    });
+  }
+
+  formatDate(dateString: string | undefined): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
     });
   }
 }

@@ -59,6 +59,7 @@ export type RuleField =
   | 'fileType'
   | 'fileSize'
   | 'readStatus'
+  | 'dateFinished'
   | 'metadataScore';
 
 
@@ -107,6 +108,7 @@ export type GroupFormGroup = FormGroup<{
 const FIELD_CONFIGS: Record<RuleField, FullFieldConfig> = {
   library: {label: 'Library'},
   readStatus: {label: 'Read Status'},
+  dateFinished: {label: 'Date Finished', type: 'date'},
   metadataScore: {label: 'Metadata Score', type: 'decimal', max: 100},
   title: {label: 'Title'},
   authors: {label: 'Authors'},

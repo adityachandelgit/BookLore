@@ -80,6 +80,7 @@ public class BookService {
                 setBookProgress(book, progress);
                 book.setLastReadTime(progress.getLastReadTime());
                 book.setReadStatus(String.valueOf(progress.getReadStatus()));
+                book.setDateFinished(progress.getDateFinished());
             }
         });
 
@@ -108,6 +109,8 @@ public class BookService {
             if (progress != null) {
                 setBookProgress(book, progress);
                 book.setLastReadTime(progress.getLastReadTime());
+                book.setReadStatus(String.valueOf(progress.getReadStatus()));
+                book.setDateFinished(progress.getDateFinished());
             }
 
             return book;
@@ -277,6 +280,7 @@ public class BookService {
         }
         book.setFilePath(FileUtils.getBookFullPath(bookEntity));
         book.setReadStatus(String.valueOf(userProgress.getReadStatus()));
+        book.setDateFinished(userProgress.getDateFinished());
 
         if (!withDescription) {
             book.getMetadata().setDescription(null);
@@ -307,6 +311,7 @@ public class BookService {
             progress.setEpubProgressPercent(null);
             progress.setCbxProgress(null);
             progress.setCbxProgressPercent(null);
+            progress.setDateFinished(null);
 
             userBookProgressRepository.save(progress);
             updatedBooks.add(bookMapper.toBook(bookEntity));
@@ -374,7 +379,7 @@ public class BookService {
     }
 
     @Transactional
-    public void updateReadStatus(List<Long> bookIds, String status) {
+    public List<Book> updateReadStatus(List<Long> bookIds, String status) {
         BookLoreUser user = authenticationService.getAuthenticatedUser();
         ReadStatus readStatus = EnumUtils.getEnumIgnoreCase(ReadStatus.class, status);
 
@@ -392,8 +397,37 @@ public class BookService {
             progress.setUser(userEntity);
             progress.setBook(book);
             progress.setReadStatus(readStatus);
+            
+            // Set dateFinished when status is READ, clear it otherwise
+            if (readStatus == ReadStatus.READ) {
+                progress.setDateFinished(Instant.now());
+            } else {
+                progress.setDateFinished(null);
+            }
+            
             userBookProgressRepository.save(progress);
         }
+        
+        // Return updated books with the latest data
+        return books.stream()
+                .map(bookEntity -> {
+                    Book book = bookMapper.toBook(bookEntity);
+                    book.setFilePath(FileUtils.getBookFullPath(bookEntity));
+                    
+                    UserBookProgressEntity progress = userBookProgressRepository
+                            .findByUserIdAndBookId(user.getId(), bookEntity.getId())
+                            .orElse(null);
+                    
+                    if (progress != null) {
+                        setBookProgress(book, progress);
+                        book.setLastReadTime(progress.getLastReadTime());
+                        book.setReadStatus(String.valueOf(progress.getReadStatus()));
+                        book.setDateFinished(progress.getDateFinished());
+                    }
+                    
+                    return book;
+                })
+                .collect(Collectors.toList());
     }
 
     public ResponseEntity<Resource> downloadBook(Long bookId) {

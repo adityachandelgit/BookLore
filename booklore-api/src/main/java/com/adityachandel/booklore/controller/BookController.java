@@ -120,9 +120,9 @@ public class BookController {
     }
 
     @PutMapping("/read-status")
-    public ResponseEntity<Void> updateReadStatus(@RequestBody @Valid ReadStatusUpdateRequest request) {
-        bookService.updateReadStatus(request.ids(), request.status());
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<List<Book>> updateReadStatus(@RequestBody @Valid ReadStatusUpdateRequest request) {
+        List<Book> updatedBooks = bookService.updateReadStatus(request.ids(), request.status());
+        return ResponseEntity.ok(updatedBooks);
     }
 
     @PostMapping("/reset-progress")

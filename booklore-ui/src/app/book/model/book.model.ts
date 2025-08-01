@@ -21,6 +21,7 @@ export interface Book {
   seriesCount?: number | null;
   metadataMatchScore?: number | null;
   readStatus?: ReadStatus;
+  dateFinished?: string;
   libraryPath?: { id: number };
 }
 
