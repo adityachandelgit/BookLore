@@ -56,13 +56,15 @@ public class BookCreatorService {
             bookEntity.getMetadata().setAuthors(new HashSet<>());
         }
         authors.stream()
+                .map(authorName -> truncate(authorName, 255))
                 .map(authorName -> authorRepository.findByName(authorName)
                         .orElseGet(() -> authorRepository.save(AuthorEntity.builder().name(authorName).build())))
                 .forEach(authorEntity -> bookEntity.getMetadata().getAuthors().add(authorEntity));
     }
 
     private String truncate(String input, int maxLength) {
-        if (input == null) return null;
+        if (input == null)
+            return null;
         return input.length() <= maxLength ? input : input.substring(0, maxLength);
     }
 
