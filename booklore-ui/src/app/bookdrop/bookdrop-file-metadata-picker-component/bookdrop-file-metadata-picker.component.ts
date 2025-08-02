@@ -68,6 +68,7 @@ export class BookdropFileMetadataPickerComponent {
     {label: 'HC Reviews', controlName: 'hardcoverReviewCount', lockedKey: 'hardcoverReviewCountLocked', fetchedKey: 'hardcoverReviewCount'},
     {label: 'HC Rating', controlName: 'hardcoverRating', lockedKey: 'hardcoverRatingLocked', fetchedKey: 'hardcoverRating'},
     {label: 'Google ID', controlName: 'googleId', lockedKey: 'googleIdLocked', fetchedKey: 'googleIdRating'},
+    {label: 'CV ID', controlName: 'comicvineId', lockedKey: 'comicvineIdLocked', fetchedKey: 'comicvineId'},
     {label: 'Pages', controlName: 'pageCount', lockedKey: 'pageCountLocked', fetchedKey: 'pageCount'}
   ];
 
@@ -155,6 +156,7 @@ export class BookdropFileMetadataPickerComponent {
         hardcoverRating: this.originalMetadata.hardcoverRating || null,
         hardcoverReviewCount: this.originalMetadata.hardcoverReviewCount || null,
         googleId: this.originalMetadata.googleId || null,
+        comicvineId: this.originalMetadata.comicvineId || null,
         seriesName: this.originalMetadata.seriesName || null,
         seriesNumber: this.originalMetadata.seriesNumber || null,
         seriesTotal: this.originalMetadata.seriesTotal || null,

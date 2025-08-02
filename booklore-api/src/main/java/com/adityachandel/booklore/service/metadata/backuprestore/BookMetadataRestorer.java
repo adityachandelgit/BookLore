@@ -56,6 +56,7 @@ public class BookMetadataRestorer {
         if (!isLocked(metadata.getIsbn10Locked())) metadata.setIsbn10(backup.getIsbn10());
         if (!isLocked(metadata.getAsinLocked())) metadata.setAsin(backup.getAsin());
         if (!isLocked(metadata.getGoodreadsIdLocked())) metadata.setGoodreadsId(backup.getGoodreadsId());
+        if (!isLocked(metadata.getComicvineIdLocked())) metadata.setComicvineId(backup.getComicvineId());
         if (!isLocked(metadata.getHardcoverIdLocked())) metadata.setHardcoverId(backup.getHardcoverId());
         if (!isLocked(metadata.getGoogleIdLocked())) metadata.setGoogleId(backup.getGoogleId());
 

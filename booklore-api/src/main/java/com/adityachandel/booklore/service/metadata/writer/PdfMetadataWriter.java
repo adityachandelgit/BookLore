@@ -151,6 +151,7 @@ public class PdfMetadataWriter implements MetadataWriter {
 
         helper.copyGoogleId(restoreMode, clear != null && clear.isGoogleId(), id -> appendIdentifier(doc, rdfBag, "google", id != null ? id : ""));
         helper.copyGoodreadsId(restoreMode, clear != null && clear.isGoodreadsId(), id -> appendIdentifier(doc, rdfBag, "goodreads", id != null ? id : ""));
+        helper.copyComicvineId(restoreMode, clear != null && clear.isComicvineId(), id -> appendIdentifier(doc, rdfBag, "comicvine", id != null ? id : ""));
         helper.copyHardcoverId(restoreMode, clear != null && clear.isHardcoverId(), id -> appendIdentifier(doc, rdfBag, "hardcover", id != null ? id : ""));
         helper.copyAsin(restoreMode, clear != null && clear.isAsin(), id -> appendIdentifier(doc, rdfBag, "amazon", id != null ? id : ""));
         helper.copyIsbn13(restoreMode, clear != null && clear.isIsbn13(), id -> appendIdentifier(doc, rdfBag, "isbn", id != null ? id : ""));

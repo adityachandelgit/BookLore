@@ -46,6 +46,7 @@ export interface MetadataProviderSettings {
   google: Google;
   goodReads: Goodreads;
   hardcover: Hardcover;
+  comicvine: Comicvine;
 }
 
 export interface Amazon {
@@ -66,7 +67,10 @@ export interface Hardcover {
   enabled: boolean;
   apiKey: string;
 }
-
+export interface Comicvine {
+  enabled: boolean;
+  apiKey: string;
+}
 export interface MetadataPersistenceSettings {
   saveToOriginalFile: boolean;
   backupMetadata: boolean;

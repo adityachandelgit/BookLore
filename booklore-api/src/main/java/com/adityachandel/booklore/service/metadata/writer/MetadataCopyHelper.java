@@ -126,6 +126,13 @@ public class MetadataCopyHelper {
         }
     }
 
+    public void copyComicvineId(boolean restore, boolean clear, Consumer<String> consumer) {
+        if (!isLocked(metadata.getComicvineIdLocked())) {
+            if (clear) consumer.accept(null);
+            else if (metadata.getComicvineId() != null || restore) consumer.accept(metadata.getComicvineId());
+        }
+    }
+
     public void copyHardcoverId(boolean restore, boolean clear, Consumer<String> consumer) {
         if (!isLocked(metadata.getHardcoverIdLocked())) {
             if (clear) consumer.accept(null);

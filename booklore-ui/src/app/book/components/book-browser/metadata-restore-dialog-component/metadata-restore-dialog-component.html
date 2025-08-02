@@ -65,6 +65,9 @@
             @if (backupMetadata.amazonReviewCount !== null) {
               <div><strong>Amazon Review Count:</strong> {{ backupMetadata.amazonReviewCount }}</div>
             }
+            @if (backupMetadata.comicvineId) {
+              <div><strong>Comicvine ID:</strong> {{ backupMetadata.comicvineId }}</div>
+            }
             @if (backupMetadata.goodreadsId) {
               <div><strong>Goodreads ID:</strong> {{ backupMetadata.goodreadsId }}</div>
             }

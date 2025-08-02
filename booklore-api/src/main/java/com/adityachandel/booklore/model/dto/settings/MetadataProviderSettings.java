@@ -8,6 +8,7 @@ public class MetadataProviderSettings {
     private Google google;
     private Goodreads goodReads;
     private Hardcover hardcover;
+    private Comicvine comicvine;
 
     @Data
     public static class Amazon {
@@ -28,6 +29,11 @@ public class MetadataProviderSettings {
 
     @Data
     public static class Hardcover {
+        private boolean enabled;
+        private String apiKey;
+    }
+    @Data
+    public static class Comicvine {
         private boolean enabled;
         private String apiKey;
     }

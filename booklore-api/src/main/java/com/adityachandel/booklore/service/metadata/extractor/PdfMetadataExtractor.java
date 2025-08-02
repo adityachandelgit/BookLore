@@ -165,6 +165,11 @@ public class PdfMetadataExtractor implements FileMetadataExtractor {
                                     metadataBuilder.goodreadsId(goodreads);
                                 }
 
+                                String comicvine = identifiers.get("comicvine");
+                                if (StringUtils.isNotBlank(comicvine)) {
+                                    metadataBuilder.comicvineId(comicvine);
+                                }
+
                                 String hardcover = identifiers.get("hardcover");
                                 if (StringUtils.isNotBlank(hardcover)) {
                                     metadataBuilder.hardcoverId(hardcover);

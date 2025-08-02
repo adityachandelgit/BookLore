@@ -58,6 +58,8 @@ export class MetadataProviderSettingsComponent implements OnInit {
   amazonEnabled: boolean = false;
   goodreadsEnabled: boolean = false;
   googleEnabled: boolean = false;
+  comicvineEnabled: boolean = false;
+  comicvineToken: string = '';
 
   private appSettingsService = inject(AppSettingsService);
   private messageService = inject(MessageService);
@@ -79,6 +81,8 @@ export class MetadataProviderSettingsComponent implements OnInit {
         this.googleEnabled = metadataProviderSettings?.google?.enabled ?? false;
         this.hardcoverToken = metadataProviderSettings?.hardcover?.apiKey ?? '';
         this.hardcoverEnabled = metadataProviderSettings?.hardcover?.enabled ?? false;
+        this.comicvineEnabled = metadataProviderSettings?.comicvine?.enabled ?? false;
+        this.comicvineToken = metadataProviderSettings?.comicvine?.apiKey ?? '';
       });
   }
 
@@ -86,6 +90,13 @@ export class MetadataProviderSettingsComponent implements OnInit {
     this.hardcoverToken = newToken;
     if (!newToken.trim()) {
       this.hardcoverEnabled = false;
+    }
+  }
+
+  onComicTokenChange(newToken: string): void {
+    this.comicvineToken = newToken;
+    if (!newToken.trim()) {
+      this.comicvineEnabled = false;
     }
   }
 
@@ -99,6 +110,12 @@ export class MetadataProviderSettingsComponent implements OnInit {
             cookie: this.amazonCookie,
             domain: this.selectedAmazonDomain
           },
+          
+          comicvine: {
+            enabled: this.comicvineEnabled,
+            apiKey: this.comicvineToken.trim()
+          },
+          
           goodReads: {enabled: this.goodreadsEnabled},
           google: {enabled: this.googleEnabled},
           hardcover: {

@@ -183,7 +183,14 @@ export class MetadataSearcherComponent implements OnInit, OnDestroy {
     } else if (metadata.hardcoverId) {
       return `<a href="https://hardcover.app/books/${metadata.hardcoverId}" target="_blank">Hardcover</a>`;
     }
-
+    else if (metadata.comicvineId) {
+      if( metadata.comicvineId.startsWith('4000')) {
+        const name = metadata.seriesName ? metadata.seriesName.replace(/ /g, '-').toLowerCase() + "-" + metadata.seriesNumber : '';
+        return `<a href="https://comicvine.gamespot.com/${name}/${metadata.comicvineId}" target="_blank">Comicvine</a>`;
+      }
+      const name = metadata.seriesName;
+      return `<a href="https://comicvine.gamespot.com/volume/${metadata.comicvineId}" target="_blank">Comicvine</a>`;
+    }
     throw new Error("No provider ID found in metadata.");
   }
 }

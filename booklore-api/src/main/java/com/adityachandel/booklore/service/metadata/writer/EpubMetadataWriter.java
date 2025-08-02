@@ -119,6 +119,7 @@ public class EpubMetadataWriter implements MetadataWriter {
                 boolean clearFlag = clear != null && switch (scheme) {
                     case "AMAZON" -> clear.isAsin();
                     case "GOOGLE" -> clear.isGoogleId();
+                    case "COMICVINE" -> clear.isComicvineId();
                     case "GOODREADS" -> clear.isGoodreadsId();
                     case "HARDCOVER" -> clear.isHardcoverId();
                     case "ISBN" -> clear.isIsbn10();
@@ -133,6 +134,9 @@ public class EpubMetadataWriter implements MetadataWriter {
                         updateIdentifier(metadataElement, opfDoc, scheme, idValue, hasChanges);
                     });
                     case "GOODREADS" -> helper.copyGoodreadsId(restoreMode, clearFlag, idValue -> {
+                        updateIdentifier(metadataElement, opfDoc, scheme, idValue, hasChanges);
+                    });
+                    case "COMICVINE" -> helper.copyComicvineId(restoreMode, clearFlag, idValue -> {
                         updateIdentifier(metadataElement, opfDoc, scheme, idValue, hasChanges);
                     });
                     case "HARDCOVER" -> helper.copyHardcoverId(restoreMode, clearFlag, idValue -> {

@@ -355,6 +355,18 @@
                 }
               </div>
             </div>
+            <div class="flex flex-col gap-1 w-1/6">
+              <label for="comicvineId">Comicvine ID</label>
+              <div class="flex justify-between items-center gap-2">
+                <input pInputText id="comicvineId" formControlName="comicvineId" class="w-full"/>
+                @if (!book.metadata!['comicvineIdLocked']) {
+                  <p-button icon="pi pi-lock-open" [outlined]="true" (onClick)="toggleLock('comicvineId')" severity="success"></p-button>
+                }
+                @if (book.metadata!['comicvineIdLocked']) {
+                  <p-button icon="pi pi-lock" [outlined]="true" (onClick)="toggleLock('comicvineId')" severity="warn"></p-button>
+                }
+              </div>
+            </div>
           </div>
         </div>
       </div>

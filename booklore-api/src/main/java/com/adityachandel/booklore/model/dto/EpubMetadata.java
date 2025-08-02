@@ -35,6 +35,7 @@ public class EpubMetadata {
     private Double amazonRating;
     private Integer amazonReviewCount;
     private String goodreadsId;
+    private String comicvineId;
     private Double goodreadsRating;
     private Integer goodreadsReviewCount;
     private String hardcoverId;

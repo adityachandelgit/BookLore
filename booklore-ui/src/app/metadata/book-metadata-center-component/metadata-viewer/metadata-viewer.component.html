@@ -172,8 +172,24 @@
                   />
                 </a>
               }
+
+              @if (book?.metadata?.comicvineId) {
+                <a
+                  class="flex items-center gap-1"
+                  [href]="'https://comicvine.gamespot.com/' + book.metadata!.comicvineId"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <img
+                    src="https://www.comicvine.com/favicon.ico"
+                    alt="Comic Vine"
+                    class="w-5 h-5 object-contain transform transition duration-200 hover:scale-125 hover:drop-shadow-lg"
+                  />
+                </a>
+              }
             </div>
           </div>
+
 
           @if (book?.metadata?.categories?.length) {
             <div class="overflow-x-auto scrollbar-hide max-w-7xl pt-2 md:pt-0">

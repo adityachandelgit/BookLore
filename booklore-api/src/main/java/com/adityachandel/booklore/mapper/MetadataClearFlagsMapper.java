@@ -20,6 +20,7 @@ public interface MetadataClearFlagsMapper {
     @Mapping(target = "isbn10", source = "clearIsbn10")
     @Mapping(target = "asin", source = "clearAsin")
     @Mapping(target = "goodreadsId", source = "clearGoodreadsId")
+    @Mapping(target = "comicvineId", source = "clearComicvineId")
     @Mapping(target = "hardcoverId", source = "clearHardcoverId")
     @Mapping(target = "googleId", source = "clearGoogleId")
     @Mapping(target = "pageCount", source = "clearPageCount")

@@ -105,6 +105,9 @@ public class BookMetadataEntity {
     @Column(name = "google_id", length = 100)
     private String googleId;
 
+    @Column(name = "comicvine_id", length = 100)
+    private String comicvineId;
+
     // Locking fields
 
     @Column(name = "title_locked")
@@ -185,6 +188,9 @@ public class BookMetadataEntity {
     @Column(name = "google_id_locked")
     private Boolean googleIdLocked = Boolean.FALSE;
 
+    @Column(name = "comicvine_id_locked")
+    private Boolean comicvineIdLocked = Boolean.FALSE;
+
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "book_id")
@@ -231,6 +237,7 @@ public class BookMetadataEntity {
         this.goodreadsReviewCountLocked = lock;
         this.hardcoverRatingLocked = lock;
         this.hardcoverReviewCountLocked = lock;
+        this.comicvineIdLocked = lock;
         this.personalRatingLocked = lock;
         this.goodreadsIdLocked = lock;
         this.hardcoverIdLocked = lock;
@@ -262,6 +269,7 @@ public class BookMetadataEntity {
                 && Boolean.TRUE.equals(this.hardcoverReviewCountLocked)
                 && Boolean.TRUE.equals(this.personalRatingLocked)
                 && Boolean.TRUE.equals(this.goodreadsIdLocked)
+                && Boolean.TRUE.equals(this.comicvineIdLocked)
                 && Boolean.TRUE.equals(this.hardcoverIdLocked)
                 && Boolean.TRUE.equals(this.googleIdLocked)
                 ;

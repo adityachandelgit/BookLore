@@ -309,6 +309,11 @@ public class MetadataRefreshService {
         if (metadataMap.containsKey(Google)) {
             metadata.setGoogleId(metadataMap.get(Google).getGoogleId());
         }
+        if (metadataMap.containsKey(Comicvine)){
+            metadata.setComicvineId(metadataMap.get(Comicvine).getComicvineId());
+        }
+        
+        
 
         if (request.getRefreshOptions().isMergeCategories()) {
             metadata.setCategories(getAllCategories(metadataMap, fieldOptions.getCategories(), BookMetadata::getCategories));

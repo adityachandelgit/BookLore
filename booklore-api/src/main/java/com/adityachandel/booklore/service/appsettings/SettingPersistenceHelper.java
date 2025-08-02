@@ -78,10 +78,15 @@ public class SettingPersistenceHelper {
         defaultHardcover.setEnabled(false);
         defaultHardcover.setApiKey(null);
 
+        MetadataProviderSettings.Comicvine defaultComicvine = new MetadataProviderSettings.Comicvine();
+        defaultComicvine.setEnabled(false);
+        defaultComicvine.setApiKey(null);
+
         defaultMetadataProviderSettings.setAmazon(defaultAmazon);
         defaultMetadataProviderSettings.setGoogle(defaultGoogle);
         defaultMetadataProviderSettings.setGoodReads(defaultGoodreads);
         defaultMetadataProviderSettings.setHardcover(defaultHardcover);
+        defaultMetadataProviderSettings.setComicvine(defaultComicvine);
 
         return defaultMetadataProviderSettings;
     }
